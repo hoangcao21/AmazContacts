@@ -1,15 +1,11 @@
 package group.amazcontacts;
 
 import android.app.ActionBar;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.TabHost;
-import android.widget.TableLayout;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
@@ -22,10 +18,11 @@ import group.amazcontacts.adapter.MainActivityCustomPagerAdapter;
 
 public class MainActivity extends AppCompatActivity {
 
-    TabLayout tabLayout;
-    ViewPager viewPager;
-    Toolbar toolbar;
-    ActionBar actionBar;
+    private TabLayout tabLayout;
+    private ViewPager viewPager;
+    private Toolbar toolbar;
+    private ActionBar actionBar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,7 +30,8 @@ public class MainActivity extends AppCompatActivity {
         mapping();
         setupViews();
     }
-    private void setupViews(){
+
+    private void setupViews() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         MainActivityCustomPagerAdapter customPagerAdapter = new MainActivityCustomPagerAdapter(fragmentManager);
         //set adapter for viewpager
@@ -43,7 +41,8 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.setTabsFromPagerAdapter(customPagerAdapter);
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(viewPager));
     }
-    private void mapping(){
+
+    private void mapping() {
         tabLayout = findViewById(R.id.tabLayout);
         viewPager = findViewById(R.id.viewPager);
 
@@ -52,5 +51,28 @@ public class MainActivity extends AppCompatActivity {
         this.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         toolbar.setBackgroundColor(getResources().getColor(R.color.colorAccent));
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.main_menu, menu);
+
+        MenuItem menuItem = menu.findItem(R.id.action_search);
+        SearchView searchView = (SearchView) menuItem.getActionView();
+        searchView.setQueryHint("Search");
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+
+        return true;
     }
 }
