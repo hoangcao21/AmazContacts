@@ -9,11 +9,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import group.amazcontacts.R;
-
 public class MainActivityFragment extends Fragment {
 
     private int layoutResource;
+
     public MainActivityFragment(int contentLayoutId) {
         super(contentLayoutId);
         layoutResource = contentLayoutId;
@@ -23,7 +22,7 @@ public class MainActivityFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        return inflater.inflate(layoutResource , container, false);
+        return inflater.inflate(layoutResource, container, false);
     }
 
     @Override

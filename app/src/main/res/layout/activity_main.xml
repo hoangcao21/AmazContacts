@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".activity.MainActivity">
 
     <!--
         By using Material.io, we need to nest
@@ -34,10 +34,14 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/toolbar">
 
+            <!-- If we create our own fragments,
+            then these commented code is for example.
+
             <com.google.android.material.tabs.TabItem
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Monday" />
+                android:icon="@drawable/baseline_contacts_black_24"
+                android:text="Contacts" />
 
             <com.google.android.material.tabs.TabItem
                 android:layout_width="wrap_content"
@@ -48,6 +52,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Wednesday" />
+             -->
         </com.google.android.material.tabs.TabLayout>
 
         <androidx.viewpager.widget.ViewPager

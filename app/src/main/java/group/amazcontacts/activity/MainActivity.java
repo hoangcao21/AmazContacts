@@ -1,4 +1,4 @@
-package group.amazcontacts;
+package group.amazcontacts.activity;
 
 import android.app.ActionBar;
 import android.os.Bundle;
@@ -9,12 +9,17 @@ import android.view.MenuItem;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.FragmentManager;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.tabs.TabLayout;
 
-import group.amazcontacts.adapter.MainActivityCustomPagerAdapter;
+import java.util.Objects;
+
+import group.amazcontacts.R;
+import group.amazcontacts.adapter.ViewPagerAdapter;
+import group.amazcontacts.fragment.ContactsFragment;
+import group.amazcontacts.fragment.DialFragment;
+import group.amazcontacts.fragment.FavoritesFragment;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -22,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private ViewPager viewPager;
     private Toolbar toolbar;
     private ActionBar actionBar;
+    private ContactsFragment contactsFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,14 +39,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupViews() {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        MainActivityCustomPagerAdapter customPagerAdapter = new MainActivityCustomPagerAdapter(fragmentManager);
-        //set adapter for viewpager
-        viewPager.setAdapter(customPagerAdapter);
+        ContactsFragment contactsFragment = new ContactsFragment();
+        FavoritesFragment favoritesFragment = new FavoritesFragment();
+        DialFragment dialFragment = new DialFragment();
+        ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), 0);
+        // Add fragment with title to adapter
+        viewPagerAdapter.addFragment(contactsFragment, "Contacts");
+        viewPagerAdapter.addFragment(favoritesFragment, "Favorites");
+        viewPagerAdapter.addFragment(dialFragment, "Dial");
+
+        viewPager.setAdapter(viewPagerAdapter);
+
         tabLayout.setupWithViewPager(viewPager);
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
-        tabLayout.setTabsFromPagerAdapter(customPagerAdapter);
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(viewPager));
+
+        // Set icon for fragment
+        Objects.requireNonNull(tabLayout.getTabAt(0)).setIcon(R.drawable.baseline_contacts_black_24);
+        Objects.requireNonNull(tabLayout.getTabAt(1)).setIcon(R.drawable.baseline_favorite_black_24);
+        Objects.requireNonNull(tabLayout.getTabAt(2)).setIcon(R.drawable.baseline_dialpad_black_24);
+
     }
 
     private void mapping() {
@@ -49,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
 
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        this.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        Objects.requireNonNull(this.getSupportActionBar()).setDisplayHomeAsUpEnabled(false);
         toolbar.setBackgroundColor(getResources().getColor(R.color.colorAccent));
 
     }
