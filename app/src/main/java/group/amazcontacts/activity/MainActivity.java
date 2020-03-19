@@ -28,7 +28,11 @@ import group.amazcontacts.adapter.ViewPagerAdapter;
 import group.amazcontacts.fragment.ContactsFragment;
 import group.amazcontacts.fragment.DialFragment;
 import group.amazcontacts.fragment.FavoritesFragment;
-
+/*
+ * https://docs.google.com/document/d/1sP5KD_XXHOblEPt25EoaZcFrQHEWvK0knfX1phlpCJU/edit?fbclid=IwAR0b0Zt5IQBWt1iFb3zx7UbjQlB9rQEmjLle8U5bvhb5X_-1Fci6oKP-J38&pli=1
+ *
+ *
+ * */
 public class MainActivity extends AppCompatActivity {
 
     private TabLayout tabLayout;
