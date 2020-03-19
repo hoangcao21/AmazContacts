@@ -10,7 +10,8 @@ import androidx.annotation.Nullable;
 import group.amazcontacts.R;
 
 public class SplashActivity extends Activity {
-    private final int SPLASH_DISPLAY_LENGTH = 3000;
+    // TODO: Revert SPLASH_DISPLAY_LENGTH to 3000
+    private final int SPLASH_DISPLAY_LENGTH = 10;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
