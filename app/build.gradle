@@ -29,7 +29,8 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'com.google.android.material:material:1.0.0'
     implementation 'de.hdodenhof:circleimageview:3.0.0' // Used for make avatar circular
-    implementation 'com.github.bumptech.glide:glide:4.11.0' // Used for loading image URL into ImageView
+    implementation 'com.github.bumptech.glide:glide:4.11.0'
+    // Used for loading image URL into ImageView
     annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
 
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
