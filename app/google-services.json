@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "79772133583",
+    "firebase_url": "https://amazcontacts-980d3.firebaseio.com",
+    "project_id": "amazcontacts-980d3",
+    "storage_bucket": "amazcontacts-980d3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:79772133583:android:d09b8ddca5754a4778afba",
+        "android_client_info": {
+          "package_name": "group.amazcontacts"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "79772133583-m9uia784tr5fntbt4ophqm35nnkjv5pi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "group.amazcontacts",
+            "certificate_hash": "6cffec875a033b2290e3ab0df5a9502927e44db3"
+          }
+        },
+        {
+          "client_id": "79772133583-4m98u75463ni5qc5anpjdl17b8akj315.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD4UCc1owisjtFBBf3dNbd9PnRK0PjnMMg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "79772133583-4m98u75463ni5qc5anpjdl17b8akj315.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

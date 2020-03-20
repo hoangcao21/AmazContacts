@@ -33,7 +33,14 @@ import group.amazcontacts.fragment.FavoritesFragment;
 /*
  * https://docs.google.com/document/d/1sP5KD_XXHOblEPt25EoaZcFrQHEWvK0knfX1phlpCJU/edit?fbclid=IwAR0b0Zt5IQBWt1iFb3zx7UbjQlB9rQEmjLle8U5bvhb5X_-1Fci6oKP-J38&pli=1
  *
- *
+ *  Variant: debugUnitTest
+    Config: debug
+    Store: C:\Users\LEGION\.android\debug.keystore
+    Alias: AndroidDebugKey
+    MD5: 1D:E8:28:33:8B:77:85:FE:2F:03:66:AC:16:80:AF:18
+    SHA1: 6C:FF:EC:87:5A:03:3B:22:90:E3:AB:0D:F5:A9:50:29:27:E4:4D:B3
+    SHA-256: 2F:03:64:FB:F4:01:32:16:61:D4:52:B2:38:A8:0B:90:C0:20:F5:9C:1B:12:B8:AB:24:6B:67:2B:F0:3C:22:FC
+    Valid until: Sunday, December 5, 2049
  * */
 public class MainActivity extends AppCompatActivity {
 
