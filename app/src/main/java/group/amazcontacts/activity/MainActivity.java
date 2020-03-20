@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.ListView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -164,6 +165,7 @@ public class MainActivity extends AppCompatActivity {
         SearchView searchView = (SearchView) menuItem.getActionView();
         searchView.setQueryHint("Search");
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            ListView contactListView = ContactsFragment.getListView();
             @Override
             public boolean onQueryTextSubmit(String query) {
                 return false;
