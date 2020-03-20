@@ -1,19 +1,28 @@
 package group.amazcontacts.fragment;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.util.Log;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.ListView;
 
 import androidx.annotation.NonNull;
@@ -26,6 +35,7 @@ import java.util.List;
 import java.util.Objects;
 
 import group.amazcontacts.R;
+import group.amazcontacts.activity.MainActivity;
 import group.amazcontacts.adapter.ContactAdapter;
 import group.amazcontacts.model.Contact;
 
@@ -82,18 +92,80 @@ public class ContactsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         thisView = view;
+        contactListView = thisView.findViewById(R.id.contacts_list_view);
+        contactListView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
+        contactListView.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
+            List<Integer> listPositions = new ArrayList<>();
+
+            @Override
+            public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
+                if (!listPositions.contains(position)) {
+                    listPositions.add(position);
+                } else {
+                    listPositions.remove((Integer) position);
+//                    contactListView.getChildAt(position).setBackgroundColor(0x00000000); // Transparent
+                }
+
+                mode.setTitle(listPositions.size() + " contact(s) selected.");
+            }
+
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                MainActivity.getToolbar().setVisibility(View.GONE);
+                MenuInflater menuInflater = mode.getMenuInflater();
+                menuInflater.inflate(R.menu.contacts_context_menu, menu);
+
+                return true;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, final MenuItem item) {
+                if (item.getItemId() == R.id.action_delete) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                    builder.setTitle("Are you sure to delete contacts(s)?");
+                    builder.setMessage("Once your choose to delete, you can't recover it.");
+                    builder.setPositiveButton("Yes, delete contact(s)", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                            for (int index : listPositions) {
+                                Contact contact = contactList.get(index);
+                                deleteContactById(getContext(), Long.parseLong(contact.getId()));
+                            }
+
+                        }
+                    });
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+
+                }
+                return false;
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+                MainActivity.getToolbar().setVisibility(View.VISIBLE);
+                listPositions.clear();
+            }
+        });
         setContacts(getContext(), getActivity());
     }
 
-    public static void setContacts(Context context, Activity activity) {
-        SharedPreferences pref = activity.getSharedPreferences("AmazContacts", 0); // 0 = MODE_PRIVATE
-        boolean isContactPermissionGranted = pref.getBoolean("isContactPermissionGranted", false);
-        if (isContactPermissionGranted) {
-            contactListView = thisView.findViewById(R.id.contacts_list_view);
-            contactList = getContacts(Objects.requireNonNull(context));
-            ContactAdapter contactAdapter = new ContactAdapter(contactList, activity);
 
-            contactListView.setAdapter(contactAdapter);
+    private static Context contextX;
+
+    public static void setContacts(Context context, Activity activity) {
+        contextX = context;
+        SharedPreferences pref = activity.getSharedPreferences("AmazContacts", 0); // 0 = MODE_PRIVATE
+        boolean isReadContactsPermissionGranted = pref.getBoolean("isReadContactsPermissionGranted", false);
+        boolean isWriteContactsPermissionGranted = pref.getBoolean("isWriteContactsPermissionGranted", false);
+        if (isReadContactsPermissionGranted && isWriteContactsPermissionGranted) {
+            new ContactsUpdateUI(activity).execute("");
         }
     }
 
@@ -160,6 +232,54 @@ public class ContactsFragment extends Fragment {
             cursor.close();
         }
         return list;
+    }
+
+    static class ContactsUpdateUI extends AsyncTask<String, String, String> {
+        private ContactAdapter contactAdapter;
+        private Activity activity;
+
+        public ContactsUpdateUI(Activity activity) {
+            this.activity = activity;
+        }
+
+        @Override
+        protected String doInBackground(String... strings) {
+            contactList = getContacts(Objects.requireNonNull(contextX));
+            contactAdapter = new ContactAdapter(contactList, activity);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            contactListView.setAdapter(contactAdapter);
+        }
+    }
+
+
+    // Thực hiện xoá được nhưng máy của HoangCH (Xiaomi) có hệ điều hành MIUI không cho ứng dụng thứ 3 xoá contact ))
+    // Anh em code xong test hộ tôi chức năng này trên Samsung thử coi :v
+    private void deleteContactById(final Context ctx, final long id) {
+        final Cursor cur = ctx.getContentResolver().query(ContactsContract.Contacts.CONTENT_URI, null, ContactsContract.Contacts._ID + "="
+                + id, null, null);
+
+        if (cur != null) {
+            while (cur.moveToNext()) {
+                try {
+                    String name = cur.getString(cur.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+                    cur.moveToFirst(); // Because cursor reach end of the database, which meanes NULL (NO data to get)
+                    String lookupKey = cur.getString(cur
+                            .getColumnIndex(ContactsContract.Contacts.LOOKUP_KEY));
+                    Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI,
+                            lookupKey);
+                    int delete = ctx.getContentResolver().delete(uri, ContactsContract.Contacts._ID + "=" + id, null);
+
+                } catch (Exception e) {
+                    Log.e("TAG", "deleteContactById: ", e);
+                }
+            }
+
+        }
+        cur.close();
     }
 
 

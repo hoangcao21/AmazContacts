@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.ActionBar;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -37,13 +38,18 @@ public class MainActivity extends AppCompatActivity {
 
     private TabLayout tabLayout;
     private ViewPager viewPager;
-    private Toolbar toolbar;
+    private static Toolbar toolbar;
     private ActionBar actionBar;
     private ContactsFragment contactsFragment;
     private final int REQUEST_PERMISSION_CODE = 100;
-    private boolean isContactPermissionGranted;
+    private boolean isReadContactsPermissionGranted;
     private boolean isCallPhonePermissionGranted;
+    private boolean isWriteContactsPermissionGranted;
     private int tabPosition; // Used when permission granted (cấp quyền thành công) at ContactsFragment
+
+    public static Toolbar getToolbar() {
+        return toolbar;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,18 +57,39 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mapping();
 
-        SharedPreferences pref = getApplicationContext().getSharedPreferences("AmazContacts", MODE_PRIVATE);
-        isContactPermissionGranted = pref.getBoolean("isContactPermissionGranted", false);
-        isCallPhonePermissionGranted = pref.getBoolean("isCallPhonePermissionGranted", false);
+        SharedPreferences pref = getApplicationContext().getSharedPreferences("AmazContacts", MODE_PRIVATE); // 0 - for private mode
+        SharedPreferences.Editor editor = pref.edit();
 
-        // First time request needed
-        if (!isContactPermissionGranted || !isCallPhonePermissionGranted) {
-            requestPermissions(0); // Request all permissions
+        List<String> permissionNeeded = isPermissionsGranted(0); // Request all permission when creating GUI
+
+        if (!permissionNeeded.isEmpty()) { // This is needed when user disable permissions manually
+            for (String permission : permissionNeeded) {
+                if (permission.equals(Manifest.permission.CALL_PHONE)) {
+                    isCallPhonePermissionGranted = false;
+                    editor.putBoolean("isCallPhonePermissionGranted", false);
+                    editor.apply();
+                } else if (permission.equals(Manifest.permission.READ_CONTACTS)) {
+                    isReadContactsPermissionGranted = false;
+                    editor.putBoolean("isReadContactsPermissionGranted", false);
+                    editor.apply();
+                } else {
+                    isWriteContactsPermissionGranted = false;
+                    editor.putBoolean("isWriteContactsPermissionGranted", false);
+                    editor.apply();
+                }
+            }
+            requestPermissions(0); // Request all permission when creating GUI
         }
+
+//        // First time request needed
+//        if (!isContactPermissionGranted || !isCallPhonePermissionGranted) {
+//
+//        }
 
         setupViews();
     }
 
+    private boolean firstInitial = false;
     private void setupViews() {
         ContactsFragment contactsFragment = new ContactsFragment();
         FavoritesFragment favoritesFragment = new FavoritesFragment();
@@ -82,15 +109,20 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 // This is needed if the user
-                if (!isContactPermissionGranted || !isCallPhonePermissionGranted) {
+                if (!isReadContactsPermissionGranted || !isCallPhonePermissionGranted || !isWriteContactsPermissionGranted) {
                     requestPermissions(tab.getPosition());
                 }
 
                 tabPosition = tab.getPosition();
 
-//                if (tab.getPosition() == 1 && isContactPermissionGranted) {
+                if (!firstInitial && tabPosition == 1
+                        && isReadContactsPermissionGranted
+                        && isWriteContactsPermissionGranted) {
 //                    ContactsFragment.setContacts(getApplicationContext(), MainActivity.this);
-//                }
+                    ContactsFragment.getListView().setAdapter(null);
+                    new ContactsUpdateUI().execute("");
+                    firstInitial = true;
+                }
             }
 
             @Override
@@ -146,23 +178,38 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    public List<String> isPermissionsGranted(int position) {
+        int READ_CONTACTS_PERMISSION = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_CONTACTS);
+        int WRITE_CONTACTS_PERMISSION = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_CONTACTS);
+        int CALL_PHONE_PERMISSION = ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE);
+
+
+        List<String> listPermissionsNeeded = new ArrayList<>();
+
+        if (CALL_PHONE_PERMISSION != PackageManager.PERMISSION_GRANTED && position == 0) {
+            listPermissionsNeeded.add(Manifest.permission.CALL_PHONE);
+        }
+
+        if (READ_CONTACTS_PERMISSION != PackageManager.PERMISSION_GRANTED) {
+            listPermissionsNeeded.add(Manifest.permission.READ_CONTACTS);
+        }
+
+        if (WRITE_CONTACTS_PERMISSION != PackageManager.PERMISSION_GRANTED) {
+            listPermissionsNeeded.add(Manifest.permission.WRITE_CONTACTS);
+        }
+
+        return listPermissionsNeeded;
+    }
+
     public void requestPermissions(int position) {
-        if (!isCallPhonePermissionGranted || !isContactPermissionGranted) {
-            int READ_CONTACTS_PERMISSION = ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.READ_CONTACTS);
-            int CALL_PHONE_PERMISSION = ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE);
-            List<String> listPermissionsNeeded = new ArrayList<>();
+        if (!isCallPhonePermissionGranted || !isReadContactsPermissionGranted || !isWriteContactsPermissionGranted) {
 
-            if (CALL_PHONE_PERMISSION != PackageManager.PERMISSION_GRANTED && position == 0) {
-                listPermissionsNeeded.add(Manifest.permission.CALL_PHONE);
-            }
+            List<String> permissionNeeded = isPermissionsGranted(position);
 
-            if (READ_CONTACTS_PERMISSION != PackageManager.PERMISSION_GRANTED) {
-                listPermissionsNeeded.add(Manifest.permission.READ_CONTACTS);
-            }
-
-            if (!listPermissionsNeeded.isEmpty()) {
-                ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]), REQUEST_PERMISSION_CODE);
+            if (!permissionNeeded.isEmpty()) {
+                ActivityCompat.requestPermissions(this, permissionNeeded.toArray(new String[permissionNeeded.size()]), REQUEST_PERMISSION_CODE);
             }
         }
 
@@ -185,8 +232,14 @@ public class MainActivity extends AppCompatActivity {
                     }
                 } else if (permissions[i].equals(Manifest.permission.READ_CONTACTS)) {
                     if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
-                        isContactPermissionGranted = true;
-                        editor.putBoolean("isContactPermissionGranted", true);
+                        isReadContactsPermissionGranted = true;
+                        editor.putBoolean("isReadContactsPermissionGranted", true);
+                        editor.apply();
+                    }
+                } else if (permissions[i].equals(Manifest.permission.WRITE_CONTACTS)) {
+                    if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                        isWriteContactsPermissionGranted = true;
+                        editor.putBoolean("isWriteContactsPermissionGranted", true);
                         editor.apply();
                     }
                 }
@@ -194,9 +247,23 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // Used when permission granted at ContactsFragment
-        if (tabPosition == 1 && isContactPermissionGranted) {
-            ContactsFragment.setContacts(getApplicationContext(), MainActivity.this);
+        if (tabPosition == 1 && isReadContactsPermissionGranted && isWriteContactsPermissionGranted) {
+            new ContactsUpdateUI().execute("");
+            firstInitial = true;
         }
 
+    }
+
+    class ContactsUpdateUI extends AsyncTask<String, String, String> {
+
+        @Override
+        protected String doInBackground(String... strings) {
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            ContactsFragment.setContacts(getApplicationContext(), MainActivity.this);
+        }
     }
 }
