@@ -1,13 +1,37 @@
 package group.amazcontacts.fragment;
 
+import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 import group.amazcontacts.R;
+import group.amazcontacts.adapter.ContactAdapter;
+import group.amazcontacts.model.Contact;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -16,13 +40,32 @@ import group.amazcontacts.R;
  */
 public class DialFragment extends Fragment {
 
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
+    // TODO: Implent DIalFragment
+    private static List<Contact> contactList;
+    private static ListView dialListView;
+    private Button btnCall;
+    private Button btnDelete;
+    private static String phoneNumber = "";
+    private static TextView txtPhoneNumber;
+    private static Context contextX;
 
-    private String mParam1;
-    private String mParam2;
+    // Phải liệt kê hết tất cả phím số ở đây vì Android không cho assign function cho onClick ở tab Attributes :(
+    // region All numberpads
+    private TextView txt_1;
+    private TextView txt_2;
+    private TextView txt_3;
+    private TextView txt_4;
+    private TextView txt_5;
+    private TextView txt_6;
+    private TextView txt_7;
+    private TextView txt_8;
+    private TextView txt_9;
+    private TextView txt_Star;
+    private TextView txt_0;
+    private TextView txt_Tag;
+    // endregions
+
 
     public DialFragment() {
         // Required empty public constructor
@@ -39,20 +82,173 @@ public class DialFragment extends Fragment {
 
     public static DialFragment newInstance(String param1, String param2) {
         DialFragment fragment = new DialFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
         return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        dialListView = view.findViewById(R.id.dialListVIew);
+        btnCall = view.findViewById(R.id.btnCall);
+        btnDelete = view.findViewById(R.id.btnDelete);
+        txtPhoneNumber = view.findViewById(R.id.txt_phoneNumber);
+        txt_1 = view.findViewById(R.id.txt_1);
+        txt_2 = view.findViewById(R.id.txt_2);
+        txt_3 = view.findViewById(R.id.txt_3);
+        txt_4 = view.findViewById(R.id.txt_4);
+        txt_5 = view.findViewById(R.id.txt_5);
+        txt_6 = view.findViewById(R.id.txt_6);
+        txt_7 = view.findViewById(R.id.txt_7);
+        txt_8 = view.findViewById(R.id.txt_8);
+        txt_9 = view.findViewById(R.id.txt_9);
+        txt_Star = view.findViewById(R.id.txt_Star);
+        txt_0 = view.findViewById(R.id.txt_0);
+        txt_Tag = view.findViewById(R.id.txt_Tag);
+        setEvents();
+        contextX = getContext();
+    }
+
+    public static void setPhoneNumber(String phoneNumberX) {
+        phoneNumber = phoneNumberX;
+        txtPhoneNumber.setText(phoneNumber);
+        dialListView.setAdapter(null);
+    }
+
+    private void setEvents() {
+        btnCall.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + phoneNumber));
+                startActivity(intent);
+            }
+        });
+
+        btnDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                phoneNumber = phoneNumber.substring(0, phoneNumber.length() - 1);
+                txtPhoneNumber.setText(phoneNumber);
+                if (phoneNumber.isEmpty()) {
+                    dialListView.setAdapter(null);
+                    return;
+                }
+                new DialUpdateUI(getActivity()).execute();
+            }
+        });
+
+        txt_1.setOnClickListener(new NumberpadOnClickListener());
+        txt_2.setOnClickListener(new NumberpadOnClickListener());
+        txt_3.setOnClickListener(new NumberpadOnClickListener());
+        txt_4.setOnClickListener(new NumberpadOnClickListener());
+        txt_5.setOnClickListener(new NumberpadOnClickListener());
+        txt_6.setOnClickListener(new NumberpadOnClickListener());
+        txt_7.setOnClickListener(new NumberpadOnClickListener());
+        txt_8.setOnClickListener(new NumberpadOnClickListener());
+        txt_9.setOnClickListener(new NumberpadOnClickListener());
+        txt_Star.setOnClickListener(new NumberpadOnClickListener());
+        txt_0.setOnClickListener(new NumberpadOnClickListener());
+        txt_Tag.setOnClickListener(new NumberpadOnClickListener());
+    }
+
+    class NumberpadOnClickListener implements View.OnClickListener {
+        @Override
+        public void onClick(View v) {
+            dialNumberClick(v);
         }
+    }
+
+    private void dialNumberClick(View view) {
+        TextView textView = (TextView) view;
+        if (phoneNumber.length() < 10) {
+            phoneNumber = phoneNumber + textView.getText().toString();
+            txtPhoneNumber.setText(phoneNumber);
+            new DialUpdateUI(getActivity()).execute();
+        } else {
+            Toast.makeText(getContext(), "Sorry, the phone number can not exceed 10 numbers!", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public static List<Contact> getContacts(Context ctx, String phoneNumberToFind) {
+        List<Contact> list = new ArrayList<>();
+
+        ContentResolver contentResolver = ctx.getContentResolver();
+        Cursor cursor = contentResolver.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                null,
+                ContactsContract.CommonDataKinds.Phone.NUMBER + " LIKE '%" + phoneNumberToFind + "%'",
+                null, ContactsContract.Contacts.DISPLAY_NAME + " COLLATE LOCALIZED ASC");
+
+        if (cursor.getCount() > 0) {
+            while (cursor.moveToNext()) {
+                // CONTACT ID
+                String id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
+                InputStream inputStream = ContactsContract.Contacts.openContactPhotoInputStream(ctx.getContentResolver(),
+                        ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, new Long(id)));
+
+                Uri person = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, new Long(id));
+                Uri pURI = Uri.withAppendedPath(person, ContactsContract.Contacts.Photo.CONTENT_DIRECTORY);
+
+                Bitmap photo = null;
+                if (inputStream != null) {
+                    photo = BitmapFactory.decodeStream(inputStream);
+                }
+
+                Contact contact = new Contact();
+                List<List<String>> phoneNumbers = new ArrayList<>();
+
+                contact.setId(id);
+                contact.setName(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)));
+                boolean isFavored = (cursor.getInt(cursor.getColumnIndex(ContactsContract.Contacts.STARRED)) == 1);
+                contact.setFavored(isFavored);
+                if (photo != null)
+                    contact.setAvatar_url(pURI.toString());
+                else
+                    contact.setAvatar_url(Uri.parse("android.resource://group.amazcontacts/" + R.mipmap.default_contact_avatar).toString());
+
+                String phoneNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.
+                        Phone.NUMBER));
+                String type = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.
+                        Phone.TYPE));
+
+                List<String> phoneAndType = new ArrayList<>(); // FORMAT: TYPE, PHONE_NUMBER
+                phoneAndType.add(type);
+                phoneAndType.add(phoneNumber.replace(" ", ""));
+
+                phoneNumbers.add(phoneAndType);
+
+                contact.setPhoneNumbers(phoneNumbers);
+                list.add(contact);
+            }
+        }
+        cursor.close();
+        return list;
+    }
+
+
+    static class DialUpdateUI extends AsyncTask<String, String, String> {
+        private ContactAdapter contactAdapter;
+        private Activity activity;
+
+        public DialUpdateUI(Activity activity) {
+            this.activity = activity;
+        }
+
+        @Override
+        protected String doInBackground(String... strings) { // Only non-GUI task
+            contactList = getContacts(Objects.requireNonNull(contextX), phoneNumber);
+            contactAdapter = new ContactAdapter(contactList, activity);
+            return null;
+        }
+
+        @Override // GUI task here
+        protected void onPostExecute(String s) {
+            dialListView.setAdapter(contactAdapter);
+        }
+
     }
 
     @Override

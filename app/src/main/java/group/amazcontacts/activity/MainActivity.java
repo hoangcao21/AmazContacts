@@ -1,7 +1,6 @@
 package group.amazcontacts.activity;
 
 import android.Manifest;
-import android.app.ActionBar;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
@@ -47,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
     private TabLayout tabLayout;
     private ViewPager viewPager;
     private static Toolbar toolbar;
-    private ActionBar actionBar;
     private ContactsFragment contactsFragment;
     private final int REQUEST_PERMISSION_CODE = 100;
     private boolean isReadContactsPermissionGranted;
@@ -130,6 +128,10 @@ public class MainActivity extends AppCompatActivity {
                     ContactsFragment.getListView().setAdapter(null);
                     new ContactsUpdateUI().execute("");
                     firstInitial = true;
+                }
+
+                if (tabPosition == 0) {
+                    DialFragment.setPhoneNumber("");
                 }
             }
 

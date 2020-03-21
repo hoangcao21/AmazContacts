@@ -45,16 +45,9 @@ import group.amazcontacts.model.Contact;
  * create an instance of this fragment.
  */
 public class ContactsFragment extends Fragment {
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
     private static List<Contact> contactList;
     private static ListView contactListView;
     private static View thisView;
-
-    private String mParam1;
-    private String mParam2;
 
     public ContactsFragment() {
         // Required empty public constructor
@@ -66,20 +59,12 @@ public class ContactsFragment extends Fragment {
 
     public static ContactsFragment newInstance(String param1, String param2) {
         ContactsFragment fragment = new ContactsFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
         return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
@@ -96,6 +81,7 @@ public class ContactsFragment extends Fragment {
         contactListView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
         contactListView.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
             List<Integer> listPositions = new ArrayList<>();
+//            Menu actionModeMenu;
 
             @Override
             public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
@@ -115,6 +101,8 @@ public class ContactsFragment extends Fragment {
                 MenuInflater menuInflater = mode.getMenuInflater();
                 menuInflater.inflate(R.menu.contacts_context_menu, menu);
 
+//                actionModeMenu = menu;
+
                 return true;
             }
 
@@ -124,7 +112,7 @@ public class ContactsFragment extends Fragment {
             }
 
             @Override
-            public boolean onActionItemClicked(ActionMode mode, final MenuItem item) {
+            public boolean onActionItemClicked(final ActionMode mode, final MenuItem item) {
                 if (item.getItemId() == R.id.action_delete) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                     builder.setTitle("Are you sure to delete contacts(s)?");
@@ -138,6 +126,10 @@ public class ContactsFragment extends Fragment {
                                 deleteContactById(getContext(), Long.parseLong(contact.getId()));
                             }
 
+                            // After deleting contacts, update UI and finish action mode tool bar (X contacts selected.)
+                            new ContactsUpdateUI(getActivity()).execute("");
+                            if (mode != null)
+                                mode.finish();
                         }
                     });
                     AlertDialog dialog = builder.create();
@@ -191,7 +183,6 @@ public class ContactsFragment extends Fragment {
                     Bitmap photo = null;
                     if (inputStream != null) {
                         photo = BitmapFactory.decodeStream(inputStream);
-                        photo.getHeight();
                     }
 
 
@@ -201,10 +192,12 @@ public class ContactsFragment extends Fragment {
 
                     assert cursorInfo != null;
                     while (cursorInfo.moveToNext()) {
-
+                        // TODO: Bổ sung thêm favored (Starred) contacts
                         if (count == 0) { // Many contacts has the same ID will be converted to ONLY one contact
                             contact.setId(id);
                             contact.setName(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)));
+                            boolean isFavored = (cursorInfo.getInt(cursorInfo.getColumnIndex(ContactsContract.Contacts.STARRED)) == 1);
+                            contact.setFavored(isFavored);
                             if (photo != null)
                                 contact.setAvatar_url(pURI.toString());
                             else
@@ -218,7 +211,7 @@ public class ContactsFragment extends Fragment {
 
                         List<String> phoneAndType = new ArrayList<>(); // FORMAT: TYPE, PHONE_NUMBER
                         phoneAndType.add(type);
-                        phoneAndType.add(phoneNumber);
+                        phoneAndType.add(phoneNumber.replace(" ", ""));
 
                         phoneNumbers.add(phoneAndType);
                         count = 1;
@@ -243,13 +236,13 @@ public class ContactsFragment extends Fragment {
         }
 
         @Override
-        protected String doInBackground(String... strings) {
+        protected String doInBackground(String... strings) { // Only non-GUI task
             contactList = getContacts(Objects.requireNonNull(contextX));
             contactAdapter = new ContactAdapter(contactList, activity);
             return null;
         }
 
-        @Override
+        @Override // GUI task here
         protected void onPostExecute(String s) {
             contactListView.setAdapter(contactAdapter);
         }
