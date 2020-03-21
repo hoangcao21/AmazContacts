@@ -27,6 +27,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
 import group.amazcontacts.R;
+import group.amazcontacts.service.GoogleSignInHandlerService;
 
 public class SignUpActivity extends AppCompatActivity {
     private EditText emailEditText , passwordEditText;
@@ -37,6 +38,7 @@ public class SignUpActivity extends AppCompatActivity {
     private GoogleSignInOptions gso;
     private final String TAG = getClass().getSimpleName();
     private final int RC_SIGN_IN = 1;
+    private GoogleSignInHandlerService googleSignInHandlerService;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,7 +50,7 @@ public class SignUpActivity extends AppCompatActivity {
             public void onClick(View v) {
                 progressBar.setVisibility(View.VISIBLE);
                 final String email = emailEditText.getText().toString();
-                String password = emailEditText.getText().toString();
+                String password = passwordEditText.getText().toString();
                 firebaseAuth.createUserWithEmailAndPassword(email , password)
                         .addOnCompleteListener( new OnCompleteListener<AuthResult>() {
                             @Override
@@ -85,50 +87,33 @@ public class SignUpActivity extends AppCompatActivity {
             handleSignInResult(task);
         }
     }
-    private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
-        try {
-            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
-            firebaseAuthWithGoogle(account);
-        } catch (ApiException e) {
-            Toast.makeText(this, "Login Unsuccessful", Toast.LENGTH_SHORT)
-                    .show();
-            Log.e(TAG, "handleSignInResult: "+e);
-        }
-    }
-    private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
-        Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
-        // [START_EXCLUDE silent]
-        progressBar.setVisibility(View.VISIBLE);
-        // [END_EXCLUDE]
 
-        AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(),"");
-        firebaseAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "signInWithCredential:success");
-                            FirebaseUser user = firebaseAuth.getCurrentUser();
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            Log.w(TAG, "signInWithCredential:failure", task.getException());
-                        }
-
-                        // [START_EXCLUDE]
-                        progressBar.setVisibility(View.INVISIBLE);
-                        // [END_EXCLUDE]
-                    }
-                });
-    }
     private void setUp(){
         firebaseAuth = FirebaseAuth.getInstance();
         progressBar.setVisibility(View.INVISIBLE);
+        // set up signin service
+        googleSignInHandlerService = new GoogleSignInHandlerService(firebaseAuth, progressBar);
         // set up for google login
          gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                 .requestIdToken("firebase_web_client_id_for_google")
+                 .requestIdToken(getString(R.string.default_web_client_id))
                  .requestEmail()
                  .build();
+
+        GoogleSignInClient googleSignInClient = GoogleSignIn.getClient (SignUpActivity.this, gso);
+        googleSignInClient.silentSignIn()
+                .addOnCompleteListener(
+                        this,
+                        new OnCompleteListener<GoogleSignInAccount>() {
+                            @Override
+                            public void onComplete(@NonNull Task<GoogleSignInAccount> task) {
+                                handleSignInResult(task);
+                                FirebaseUser user = firebaseAuth.getCurrentUser();
+                                Log.e(TAG, "Current user: "+user.getEmail());
+                            }
+                        });
+    }
+    private void handleSignInResult(Task<GoogleSignInAccount> task){
+        googleSignInHandlerService.handleSignInResult(SignUpActivity.this, task);
     }
     private void mapping(){
         emailEditText = findViewById(R.id.emailEditText);
