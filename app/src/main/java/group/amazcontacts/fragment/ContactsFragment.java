@@ -151,20 +151,38 @@ public class ContactsFragment extends Fragment {
 
     private static Context contextX;
 
+    public static Context getContextX() {
+        return contextX;
+    }
+
     public static void setContacts(Context context, Activity activity) {
+        setContacts(context, activity, "");
+    }
+
+    public static void setContacts(Context context, Activity activity, String searchKey) {
         contextX = context;
         SharedPreferences pref = activity.getSharedPreferences("AmazContacts", 0); // 0 = MODE_PRIVATE
         boolean isReadContactsPermissionGranted = pref.getBoolean("isReadContactsPermissionGranted", false);
         boolean isWriteContactsPermissionGranted = pref.getBoolean("isWriteContactsPermissionGranted", false);
         if (isReadContactsPermissionGranted && isWriteContactsPermissionGranted) {
-            new ContactsUpdateUI(activity).execute("");
+            new ContactsUpdateUI(activity, searchKey).execute("");
         }
     }
 
     public static List<Contact> getContacts(Context ctx) {
+        return getContacts(ctx, "");
+    }
+
+    public static List<Contact> getContacts(Context ctx, String searchKey) {
         List<Contact> list = new ArrayList<>();
         ContentResolver contentResolver = ctx.getContentResolver();
-        Cursor cursor = contentResolver.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, "UPPER(" + ContactsContract.Contacts.DISPLAY_NAME + ") ASC");
+        String selection = null;
+        String[] args = null;
+        if (searchKey != null && searchKey != "") {
+            selection = ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " LIKE ('%' || ? || '%')";
+            args = new String[]{searchKey};
+        }
+        Cursor cursor = contentResolver.query(ContactsContract.Contacts.CONTENT_URI, null, selection, args, "UPPER(" + ContactsContract.Contacts.DISPLAY_NAME + ") ASC");
 
         if (cursor.getCount() > 0) {
             while (cursor.moveToNext()) {
@@ -172,8 +190,14 @@ public class ContactsFragment extends Fragment {
                 String id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
 
                 if (cursor.getInt(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER)) > 0) {
+                    selection = ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?";
+                    args = new String[]{id};
+
+
                     Cursor cursorInfo = contentResolver.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
-                            ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?", new String[]{id}, null);
+                            selection, args, null);
+
+
                     InputStream inputStream = ContactsContract.Contacts.openContactPhotoInputStream(ctx.getContentResolver(),
                             ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, new Long(id)));
 
@@ -216,9 +240,11 @@ public class ContactsFragment extends Fragment {
                         phoneNumbers.add(phoneAndType);
                         count = 1;
                     }
-                    contact.setPhoneNumbers(phoneNumbers);
-                    list.add(contact);
 
+                    contact.setPhoneNumbers(phoneNumbers);
+
+                    list.add(contact);
+                    Log.i("test", searchKey + " " + contact.getName() + " " + id);
                     cursorInfo.close();
                 }
             }
@@ -230,14 +256,20 @@ public class ContactsFragment extends Fragment {
     static class ContactsUpdateUI extends AsyncTask<String, String, String> {
         private ContactAdapter contactAdapter;
         private Activity activity;
+        private String searchKey;
 
         public ContactsUpdateUI(Activity activity) {
             this.activity = activity;
         }
 
+        public ContactsUpdateUI(Activity activity, String searchKey) {
+            this.activity = activity;
+            this.searchKey = searchKey;
+        }
+
         @Override
         protected String doInBackground(String... strings) { // Only non-GUI task
-            contactList = getContacts(Objects.requireNonNull(contextX));
+            contactList = getContacts(Objects.requireNonNull(contextX), searchKey);
             contactAdapter = new ContactAdapter(contactList, activity);
             return null;
         }

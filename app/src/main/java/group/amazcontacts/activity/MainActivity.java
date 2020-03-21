@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.ListView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -29,6 +28,7 @@ import group.amazcontacts.adapter.ViewPagerAdapter;
 import group.amazcontacts.fragment.ContactsFragment;
 import group.amazcontacts.fragment.DialFragment;
 import group.amazcontacts.fragment.FavoritesFragment;
+
 /*
  * https://docs.google.com/document/d/1sP5KD_XXHOblEPt25EoaZcFrQHEWvK0knfX1phlpCJU/edit?fbclid=IwAR0b0Zt5IQBWt1iFb3zx7UbjQlB9rQEmjLle8U5bvhb5X_-1Fci6oKP-J38&pli=1
  *
@@ -174,7 +174,6 @@ public class MainActivity extends AppCompatActivity {
         SearchView searchView = (SearchView) menuItem.getActionView();
         searchView.setQueryHint("Search");
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            ListView contactListView = ContactsFragment.getListView();
             @Override
             public boolean onQueryTextSubmit(String query) {
                 return false;
@@ -182,7 +181,8 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                return false;
+                new ContactsUpdateUI(newText).execute("");
+                return true;
             }
         });
 
@@ -266,6 +266,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     class ContactsUpdateUI extends AsyncTask<String, String, String> {
+        private String searchKey;
+
+        public ContactsUpdateUI(String searchKey) {
+            this.searchKey = searchKey;
+        }
+
+        public ContactsUpdateUI(){
+            this.searchKey = "";
+        }
 
         @Override
         protected String doInBackground(String... strings) {
@@ -274,7 +283,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String s) {
-            ContactsFragment.setContacts(getApplicationContext(), MainActivity.this);
+            ContactsFragment.setContacts(getApplicationContext(), MainActivity.this, searchKey);
         }
     }
 }
