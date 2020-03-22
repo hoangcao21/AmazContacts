@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "79772133583-v7ta0kbrsveobb4tdrghjg97mjirjrrs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "group.amazcontacts",
+            "certificate_hash": "0f59ea4af0f3c5a6647b3ef8570a240366a9e92a"
+          }
+        },
+        {
           "client_id": "79772133583-m9uia784tr5fntbt4ophqm35nnkjv5pi.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
