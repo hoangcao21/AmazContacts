@@ -14,11 +14,14 @@
         android:title="Add"
         app:showAsAction="always" />
 
+    <!-- Setting sẽ chứa mục Back-up, Sync from server và Change theme -->
     <item
         android:id="@+id/action_setting"
         android:title="Setting"
         app:showAsAction="never" />
+
     <item
         android:id="@+id/action_log_out"
-        android:title="Log Out" />
+        android:title="Log Out"
+        app:showAsAction="never" />
 </menu>

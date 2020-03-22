@@ -22,7 +22,6 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mapping();
+
 
         SharedPreferences pref = getApplicationContext().getSharedPreferences("AmazContacts", MODE_PRIVATE); // 0 - for private mode
         SharedPreferences.Editor editor = pref.edit();
@@ -114,6 +114,7 @@ public class MainActivity extends AppCompatActivity {
 //        }
 
         setupViews();
+
     }
 
     private boolean firstInitial = false;
@@ -137,6 +138,10 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
+                // Nếu là ở tab khác tab Dial, thì hiển thị search view
+                MenuItem searchMenuItem = mainMenu.findItem(R.id.action_search);
+                searchMenuItem.setVisible(true);
+
                 // This is needed if the user
                 if (!isReadContactsPermissionGranted || !isCallPhonePermissionGranted || !isWriteContactsPermissionGranted) {
                     requestPermissions(tab.getPosition());
@@ -156,6 +161,8 @@ public class MainActivity extends AppCompatActivity {
                 if (tabPosition == 0 && isCallPhonePermissionGranted && isReadContactsPermissionGranted && isWriteContactsPermissionGranted) {
                     DialFragment.setPhoneNumber("");
                     DialFragment.isPermissionsGranted();
+                    // Dấu search view khi vào tab Dial Fragment
+                    searchMenuItem.setVisible(false);
                 }
             }
 
@@ -188,13 +195,18 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
+    private Menu mainMenu;
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.main_menu, menu);
 
+        // Cần thiết cho việc dấu search view theo ý Hiếu
+        mainMenu = menu;
+
+
         MenuItem menuItem = menu.findItem(R.id.action_search);
+        menuItem.setVisible(false);
         SearchView searchView = (SearchView) menuItem.getActionView();
         searchView.setQueryHint("Search");
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -272,6 +284,10 @@ public class MainActivity extends AppCompatActivity {
 
             if (!permissionNeeded.isEmpty()) {
                 ActivityCompat.requestPermissions(this, permissionNeeded.toArray(new String[permissionNeeded.size()]), REQUEST_PERMISSION_CODE);
+            } else {
+                isReadContactsPermissionGranted = true;
+                isWriteContactsPermissionGranted = true;
+                isCallPhonePermissionGranted = true;
             }
         }
 
