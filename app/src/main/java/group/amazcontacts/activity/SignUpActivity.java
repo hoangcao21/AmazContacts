@@ -105,7 +105,9 @@ public class SignUpActivity extends AppCompatActivity {
                             public void onComplete(@NonNull Task<GoogleSignInAccount> task) {
                                 handleSignInResult(task);
                                 FirebaseUser user = firebaseAuth.getCurrentUser();
-                                Log.e(TAG, "Current user: " + user.getEmail());
+                                if (user != null) {
+                                    Log.e(TAG, "Current user: " + user.getEmail());
+                                }
                             }
                         });
     }

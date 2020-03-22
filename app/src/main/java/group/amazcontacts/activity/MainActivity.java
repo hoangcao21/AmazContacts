@@ -204,7 +204,8 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                return false;
+                new ContactsUpdateUI(newText).execute("");
+                return true;
             }
         });
 
@@ -292,6 +293,16 @@ public class MainActivity extends AppCompatActivity {
 
     class ContactsUpdateUI extends AsyncTask<String, String, String> {
 
+        private String searchKey;
+
+        public ContactsUpdateUI(String searchKey) {
+            this.searchKey = searchKey;
+        }
+
+        public ContactsUpdateUI() {
+            this.searchKey = "";
+        }
+
         @Override
         protected String doInBackground(String... strings) {
             return null;
@@ -299,7 +310,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String s) {
-            ContactsFragment.setContacts(getApplicationContext(), MainActivity.this);
+            ContactsFragment.setContacts(getApplicationContext(), MainActivity.this, searchKey);
         }
     }
 }
