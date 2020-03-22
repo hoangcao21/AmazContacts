@@ -7,9 +7,6 @@ import android.os.Handler;
 
 import androidx.annotation.Nullable;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-
 import group.amazcontacts.R;
 
 public class SplashActivity extends Activity {
@@ -26,15 +23,9 @@ public class SplashActivity extends Activity {
             public void run() {
                 /* Create an Intent that will start the Menu-Activity. */
                 Intent mainIntent = new Intent(SplashActivity.this,MainActivity.class);
-                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                if(user == null) {
-                    Intent signUpIntent = new Intent(SplashActivity.this, SignUpActivity.class);
-                    startActivity(signUpIntent);
-                }else{
-                    SplashActivity.this.startActivity(mainIntent);
-                    overridePendingTransition(R.anim.fadein, R.anim.fadeout);
-                    SplashActivity.this.finish();
-                }
+                SplashActivity.this.startActivity(mainIntent);
+                overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+                SplashActivity.this.finish();
             }
         }, SPLASH_DISPLAY_LENGTH);
     }

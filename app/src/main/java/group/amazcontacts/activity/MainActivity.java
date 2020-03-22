@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.WindowManager;
+import android.widget.ListView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -74,13 +76,29 @@ public class MainActivity extends AppCompatActivity {
                     isCallPhonePermissionGranted = false;
                     editor.putBoolean("isCallPhonePermissionGranted", false);
                     editor.apply();
-                } else if (permission.equals(Manifest.permission.READ_CONTACTS)) {
+                } else {
+                    isCallPhonePermissionGranted = true;
+                    editor.putBoolean("isCallPhonePermissionGranted", true);
+                    editor.apply();
+                }
+
+                if (permission.equals(Manifest.permission.READ_CONTACTS)) {
                     isReadContactsPermissionGranted = false;
                     editor.putBoolean("isReadContactsPermissionGranted", false);
                     editor.apply();
                 } else {
+                    isReadContactsPermissionGranted = true;
+                    editor.putBoolean("isReadContactsPermissionGranted", true);
+                    editor.apply();
+                }
+
+                if (permission.equals(Manifest.permission.WRITE_CONTACTS)) {
                     isWriteContactsPermissionGranted = false;
                     editor.putBoolean("isWriteContactsPermissionGranted", false);
+                    editor.apply();
+                } else {
+                    isWriteContactsPermissionGranted = true;
+                    editor.putBoolean("isWriteContactsPermissionGranted", true);
                     editor.apply();
                 }
             }
@@ -96,7 +114,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean firstInitial = false;
+
     private void setupViews() {
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         ContactsFragment contactsFragment = new ContactsFragment();
         FavoritesFragment favoritesFragment = new FavoritesFragment();
         DialFragment dialFragment = new DialFragment();
@@ -130,8 +150,9 @@ public class MainActivity extends AppCompatActivity {
                     firstInitial = true;
                 }
 
-                if (tabPosition == 0) {
+                if (tabPosition == 0 && isCallPhonePermissionGranted && isReadContactsPermissionGranted && isWriteContactsPermissionGranted) {
                     DialFragment.setPhoneNumber("");
+                    DialFragment.isPermissionsGranted();
                 }
             }
 
@@ -174,6 +195,8 @@ public class MainActivity extends AppCompatActivity {
         SearchView searchView = (SearchView) menuItem.getActionView();
         searchView.setQueryHint("Search");
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            ListView contactListView = ContactsFragment.getListView();
+
             @Override
             public boolean onQueryTextSubmit(String query) {
                 return false;
@@ -181,13 +204,13 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                new ContactsUpdateUI(newText).execute("");
-                return true;
+                return false;
             }
         });
 
         return true;
     }
+
 
     public List<String> isPermissionsGranted(int position) {
         int READ_CONTACTS_PERMISSION = ContextCompat.checkSelfPermission(this,
@@ -261,20 +284,13 @@ public class MainActivity extends AppCompatActivity {
         if (tabPosition == 1 && isReadContactsPermissionGranted && isWriteContactsPermissionGranted) {
             new ContactsUpdateUI().execute("");
             firstInitial = true;
+        } else if (tabPosition == 0 && isCallPhonePermissionGranted && isReadContactsPermissionGranted && isWriteContactsPermissionGranted) {
+            DialFragment.isPermissionsGranted();
         }
 
     }
 
     class ContactsUpdateUI extends AsyncTask<String, String, String> {
-        private String searchKey;
-
-        public ContactsUpdateUI(String searchKey) {
-            this.searchKey = searchKey;
-        }
-
-        public ContactsUpdateUI(){
-            this.searchKey = "";
-        }
 
         @Override
         protected String doInBackground(String... strings) {
@@ -283,7 +299,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String s) {
-            ContactsFragment.setContacts(getApplicationContext(), MainActivity.this, searchKey);
+            ContactsFragment.setContacts(getApplicationContext(), MainActivity.this);
         }
     }
 }

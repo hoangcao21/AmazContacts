@@ -2,12 +2,10 @@ package group.amazcontacts.fragment;
 
 import android.app.Activity;
 import android.content.ContentResolver;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -22,9 +20,9 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -49,6 +47,8 @@ public class DialFragment extends Fragment {
     private static String phoneNumber = "";
     private static TextView txtPhoneNumber;
     private static Context contextX;
+    private static ConstraintLayout layout;
+    private static Activity activity;
 
     // Phải liệt kê hết tất cả phím số ở đây vì Android không cho assign function cho onClick ở tab Attributes :(
     // region All numberpads
@@ -96,7 +96,13 @@ public class DialFragment extends Fragment {
         dialListView = view.findViewById(R.id.dialListVIew);
         btnCall = view.findViewById(R.id.btnCall);
         btnDelete = view.findViewById(R.id.btnDelete);
+        btnDelete.setVisibility(View.GONE);
         txtPhoneNumber = view.findViewById(R.id.txt_phoneNumber);
+        layout = view.findViewById(R.id.dialLayout);
+        activity = getActivity();
+
+        isPermissionsGranted();
+
         txt_1 = view.findViewById(R.id.txt_1);
         txt_2 = view.findViewById(R.id.txt_2);
         txt_3 = view.findViewById(R.id.txt_3);
@@ -111,6 +117,22 @@ public class DialFragment extends Fragment {
         txt_Tag = view.findViewById(R.id.txt_Tag);
         setEvents();
         contextX = getContext();
+    }
+
+    public static boolean isPermissionsGranted() {
+        boolean flag = false;
+        SharedPreferences pref = activity.getSharedPreferences("AmazContacts", 0); // 0 = MODE_PRIVATE
+        boolean isReadContactsPermissionGranted = pref.getBoolean("isReadContactsPermissionGranted", false);
+        boolean isWriteContactsPermissionGranted = pref.getBoolean("isWriteContactsPermissionGranted", false);
+        boolean isCallPhonePermissionGranted = pref.getBoolean("isCallPhonePermissionGranted", false);
+        if (!isReadContactsPermissionGranted || !isWriteContactsPermissionGranted || !isCallPhonePermissionGranted) {
+            layout.setVisibility(View.GONE);
+        } else {
+            layout.setVisibility(View.VISIBLE);
+            flag = true;
+        }
+
+        return flag;
     }
 
     public static void setPhoneNumber(String phoneNumberX) {
@@ -131,9 +153,12 @@ public class DialFragment extends Fragment {
         btnDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                phoneNumber = phoneNumber.substring(0, phoneNumber.length() - 1);
-                txtPhoneNumber.setText(phoneNumber);
+                if (phoneNumber.length() > 0) {
+                    phoneNumber = phoneNumber.substring(0, phoneNumber.length() - 1);
+                    txtPhoneNumber.setText(phoneNumber);
+                }
                 if (phoneNumber.isEmpty()) {
+                    btnDelete.setVisibility(View.GONE);
                     dialListView.setAdapter(null);
                     return;
                 }
@@ -158,6 +183,7 @@ public class DialFragment extends Fragment {
     class NumberpadOnClickListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
+            btnDelete.setVisibility(View.VISIBLE);
             dialNumberClick(v);
         }
     }
@@ -183,45 +209,100 @@ public class DialFragment extends Fragment {
                 null, ContactsContract.Contacts.DISPLAY_NAME + " COLLATE LOCALIZED ASC");
 
         if (cursor.getCount() > 0) {
+            int count = 0;
+            cursor.moveToNext();
+            Contact contact = new Contact();
+
+            String id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
+//            InputStream inputStream = ContactsContract.Contacts.openContactPhotoInputStream(ctx.getContentResolver(),
+//                    ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, new Long(id)));
+//
+//            Uri person = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, new Long(id));
+//            Uri pURI = Uri.withAppendedPath(person, ContactsContract.Contacts.Photo.CONTENT_DIRECTORY);
+//
+//            Bitmap photo = null;
+//            if (inputStream != null) {
+//                photo = BitmapFactory.decodeStream(inputStream);
+//            }
+            List<List<String>> phoneNumbers = new ArrayList<>();
+
+            contact.setId(id);
+            String prevName = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+            contact.setName(prevName);
+            boolean isFavored = (cursor.getInt(cursor.getColumnIndex(ContactsContract.Contacts.STARRED)) == 1);
+            contact.setFavored(isFavored);
+//            if (photo != null)
+//                contact.setAvatar_url(pURI.toString());
+//            else
+            contact.setAvatar_url(Uri.parse("android.resource://group.amazcontacts/" + R.mipmap.default_contact_avatar).toString());
+
+            String phoneNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.
+                    Phone.NUMBER));
+            String type = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.
+                    Phone.TYPE));
+            String name = "";
+
+            List<String> phoneAndType = new ArrayList<>(); // FORMAT: TYPE, PHONE_NUMBER
+            phoneAndType.add(type);
+            phoneAndType.add(phoneNumber.replace(" ", ""));
+            phoneNumbers.add(phoneAndType);
+            contact.setPhoneNumbers(phoneNumbers);
+            list.add(contact);
+
             while (cursor.moveToNext()) {
-                // CONTACT ID
-                String id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
-                InputStream inputStream = ContactsContract.Contacts.openContactPhotoInputStream(ctx.getContentResolver(),
-                        ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, new Long(id)));
+                id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
+                name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+                if (contact.getName().equals(name)) {
+                    phoneNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.
+                            Phone.NUMBER));
+                    type = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.
+                            Phone.TYPE));
 
-                Uri person = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, new Long(id));
-                Uri pURI = Uri.withAppendedPath(person, ContactsContract.Contacts.Photo.CONTENT_DIRECTORY);
+                    phoneAndType = new ArrayList<>(); // FORMAT: TYPE, PHONE_NUMBER
+                    phoneAndType.add(type);
+                    phoneAndType.add(phoneNumber.replace(" ", ""));
+                    phoneNumbers.add(phoneAndType);
+                    contact.setPhoneNumbers(phoneNumbers);
+                } else {
+                    contact = new Contact();
 
-                Bitmap photo = null;
-                if (inputStream != null) {
-                    photo = BitmapFactory.decodeStream(inputStream);
-                }
+                    id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
+//                    inputStream = ContactsContract.Contacts.openContactPhotoInputStream(ctx.getContentResolver(),
+//                            ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, new Long(id)));
+//
+//                    person = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, new Long(id));
+//                    pURI = Uri.withAppendedPath(person, ContactsContract.Contacts.Photo.CONTENT_DIRECTORY);
 
-                Contact contact = new Contact();
-                List<List<String>> phoneNumbers = new ArrayList<>();
+//                    photo = null;
+//                    if (inputStream != null) {
+//                        photo = BitmapFactory.decodeStream(inputStream);
+//                    }
+                    phoneNumbers = new ArrayList<>();
 
-                contact.setId(id);
-                contact.setName(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)));
-                boolean isFavored = (cursor.getInt(cursor.getColumnIndex(ContactsContract.Contacts.STARRED)) == 1);
-                contact.setFavored(isFavored);
-                if (photo != null)
-                    contact.setAvatar_url(pURI.toString());
-                else
+                    contact.setId(id);
+                    contact.setName(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)));
+                    isFavored = (cursor.getInt(cursor.getColumnIndex(ContactsContract.Contacts.STARRED)) == 1);
+                    contact.setFavored(isFavored);
+////                    if (photo != null)
+//                        contact.setAvatar_url(pURI.toString());
+//                    else
                     contact.setAvatar_url(Uri.parse("android.resource://group.amazcontacts/" + R.mipmap.default_contact_avatar).toString());
 
-                String phoneNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.
-                        Phone.NUMBER));
-                String type = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.
-                        Phone.TYPE));
+                    phoneNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.
+                            Phone.NUMBER));
+                    type = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.
+                            Phone.TYPE));
 
-                List<String> phoneAndType = new ArrayList<>(); // FORMAT: TYPE, PHONE_NUMBER
-                phoneAndType.add(type);
-                phoneAndType.add(phoneNumber.replace(" ", ""));
-
-                phoneNumbers.add(phoneAndType);
-
-                contact.setPhoneNumbers(phoneNumbers);
-                list.add(contact);
+                    phoneAndType = new ArrayList<>(); // FORMAT: TYPE, PHONE_NUMBER
+                    phoneAndType.add(type);
+                    phoneAndType.add(phoneNumber.replace(" ", ""));
+                    phoneNumbers.add(phoneAndType);
+                    contact.setPhoneNumbers(phoneNumbers);
+                }
+                if (!prevName.equals(name)) {
+                    list.add(contact);
+                    prevName = name;
+                }
             }
         }
         cursor.close();

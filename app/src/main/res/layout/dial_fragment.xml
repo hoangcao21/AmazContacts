@@ -6,6 +6,19 @@
     android:layout_height="match_parent"
     tools:context=".fragment.DialFragment">
 
+    <ListView
+        android:id="@+id/dialListVIew"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="1dp"
+        android:layout_marginTop="1dp"
+        android:layout_marginEnd="1dp"
+        android:layout_marginBottom="1dp"
+        app:layout_constraintBottom_toTopOf="@+id/dialLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/dialLayout"
         android:layout_width="match_parent"
@@ -24,7 +37,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="75dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="10dp"
             android:layout_marginEnd="119dp"
             android:padding="10dp"
             android:text="6"
@@ -38,7 +51,7 @@
             android:id="@+id/txt_5"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="10dp"
             android:gravity="center"
             android:padding="10dp"
             android:text="5"
@@ -82,7 +95,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="72dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="10dp"
             android:gravity="center"
             android:padding="10dp"
             android:text="9"
@@ -97,7 +110,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="96dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="10dp"
             android:layout_marginEnd="71dp"
             android:gravity="center"
             android:padding="10dp"
@@ -112,7 +125,7 @@
             android:id="@+id/txt_8"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="10dp"
             android:gravity="center"
             android:padding="10dp"
             android:text="8"
@@ -142,7 +155,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="96dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="10dp"
             android:layout_marginEnd="71dp"
             android:gravity="center"
             android:padding="10dp"
@@ -214,13 +227,11 @@
             android:id="@+id/btnCall"
             android:layout_width="54dp"
             android:layout_height="54dp"
-            android:layout_marginStart="106dp"
             android:layout_marginTop="24dp"
-            android:layout_marginEnd="92dp"
             android:background="@drawable/baseline_call_black_48"
             android:gravity="center"
-            app:layout_constraintEnd_toStartOf="@+id/btnDelete"
-            app:layout_constraintHorizontal_bias="0.808"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.47"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/txt_0" />
 
@@ -235,18 +246,5 @@
             app:layout_constraintTop_toBottomOf="@+id/txt_Tag" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <ListView
-        android:id="@+id/dialListVIew"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="1dp"
-        android:layout_marginTop="1dp"
-        android:layout_marginEnd="1dp"
-        android:layout_marginBottom="1dp"
-        app:layout_constraintBottom_toTopOf="@+id/dialLayout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
