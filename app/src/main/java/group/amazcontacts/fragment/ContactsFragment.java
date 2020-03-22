@@ -58,8 +58,7 @@ public class ContactsFragment extends Fragment {
     }
 
     public static ContactsFragment newInstance(String param1, String param2) {
-        ContactsFragment fragment = new ContactsFragment();
-        return fragment;
+        return new ContactsFragment();
     }
 
     @Override
@@ -151,9 +150,9 @@ public class ContactsFragment extends Fragment {
 
     private static Context contextX;
 
-    public static Context getContextX() {
-        return contextX;
-    }
+//    public static Context getContextX() {
+//        return contextX;
+//    }
 
     public static void setContacts(Context context, Activity activity) {
         setContacts(context, activity, "");
@@ -179,11 +178,12 @@ public class ContactsFragment extends Fragment {
         ContentResolver contentResolver = ctx.getContentResolver();
         String selection = null;
         String[] args = null;
-        if (searchKey != null && searchKey != "") {
+        if (searchKey != null && !searchKey.equals("")) {
             selection = ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " LIKE ('%' || ? || '%')";
             args = new String[]{searchKey};
         }
-        Cursor cursor = contentResolver.query(ContactsContract.Contacts.CONTENT_URI, null, selection, args, "UPPER(" + ContactsContract.Contacts.DISPLAY_NAME + ") ASC");
+        Cursor cursor = contentResolver.query(ContactsContract.Contacts.CONTENT_URI,
+                null, selection, args, "UPPER(" + ContactsContract.Contacts.DISPLAY_NAME + ") ASC");
 
         if (cursor.getCount() > 0) {
             while (cursor.moveToNext()) {
@@ -196,6 +196,7 @@ public class ContactsFragment extends Fragment {
 
                     Cursor cursorInfo = contentResolver.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
                             selection, args, null);
+
                     InputStream inputStream = ContactsContract.Contacts.openContactPhotoInputStream(ctx.getContentResolver(),
                             ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, new Long(id)));
 
@@ -237,6 +238,7 @@ public class ContactsFragment extends Fragment {
 
                         phoneNumbers.add(phoneAndType);
                         count = 1;
+
                     }
                     contact.setPhoneNumbers(phoneNumbers);
                     list.add(contact);
@@ -246,6 +248,7 @@ public class ContactsFragment extends Fragment {
             }
             cursor.close();
         }
+
         return list;
     }
 
@@ -298,9 +301,9 @@ public class ContactsFragment extends Fragment {
                     Log.e("TAG", "deleteContactById: ", e);
                 }
             }
-
+            cur.close();
         }
-        cur.close();
+
     }
 
 
