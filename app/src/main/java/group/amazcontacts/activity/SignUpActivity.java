@@ -1,6 +1,7 @@
 package group.amazcontacts.activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -36,6 +37,9 @@ public class SignUpActivity extends AppCompatActivity {
     private final String TAG = getClass().getSimpleName();
     private final int RC_SIGN_IN = 1;
     private GoogleSignInHandlerService googleSignInHandlerService;
+
+    public static final String NO_LOGIN_SILENT = "NO_LOGIN_SILENT";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -97,19 +101,20 @@ public class SignUpActivity extends AppCompatActivity {
                  .build();
 
         GoogleSignInClient googleSignInClient = GoogleSignIn.getClient (SignUpActivity.this, gso);
-        googleSignInClient.silentSignIn()
-                .addOnCompleteListener(
-                        this,
-                        new OnCompleteListener<GoogleSignInAccount>() {
-                            @Override
-                            public void onComplete(@NonNull Task<GoogleSignInAccount> task) {
-                                handleSignInResult(task);
-                                FirebaseUser user = firebaseAuth.getCurrentUser();
-                                if (user != null) {
-                                    Log.e(TAG, "Current user: " + user.getEmail());
+        //boolean SignInSilent = getIntent().getBooleanExtra(NO_LOGIN_SILENT, true);
+        SharedPreferences sharedPreferences = getSharedPreferences("data", MODE_PRIVATE);
+        boolean autoSignIN = sharedPreferences.getBoolean("Automatic Login",false);
+        if(autoSignIN){
+            googleSignInClient.silentSignIn()
+                    .addOnCompleteListener(
+                            this,
+                            new OnCompleteListener<GoogleSignInAccount>() {
+                                @Override
+                                public void onComplete(@NonNull Task<GoogleSignInAccount> task) {
+                                    handleSignInResult(task);
                                 }
-                            }
-                        });
+                            });
+        }
     }
     private void handleSignInResult(Task<GoogleSignInAccount> task){
         googleSignInHandlerService.handleSignInResult(SignUpActivity.this, task);

@@ -1,6 +1,7 @@
 package group.amazcontacts.activity;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
@@ -20,6 +21,8 @@ import androidx.core.content.ContextCompat;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -212,6 +215,30 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.action_setting:
+
+                break;
+            case R.id.action_log_out:
+                FirebaseAuth.getInstance().signOut();
+                Intent i = new Intent(getApplicationContext(), SignUpActivity.class);
+                i.putExtra(SignUpActivity.NO_LOGIN_SILENT, false);
+
+                SharedPreferences sharedPreferences = getSharedPreferences("data", MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean("Automatic Login",false);
+                editor.commit();
+
+                startActivity(i);
+//                finish();
+            default:
+                break;
+
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     public List<String> isPermissionsGranted(int position) {
         int READ_CONTACTS_PERMISSION = ContextCompat.checkSelfPermission(this,

@@ -2,6 +2,7 @@ package group.amazcontacts.service;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -39,6 +40,10 @@ public class GoogleSignInHandlerService {
             firebaseAuthWithGoogle(account);
             Toast.makeText(applicationContext, "Login success with "+account.getEmail(), Toast.LENGTH_SHORT)
                     .show();
+            SharedPreferences sharedPreferences = applicationContext.getSharedPreferences("data", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean("Automatic Login",true);
+            editor.commit();
             Intent i = new Intent(applicationContext , MainActivity.class);
             applicationContext.startActivity(i);
         } catch (ApiException e) {
@@ -61,6 +66,7 @@ public class GoogleSignInHandlerService {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
+
                             FirebaseUser user = firebaseAuth.getCurrentUser();
                         } else {
                             // If sign in fails, display a message to the user.
