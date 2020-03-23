@@ -51,6 +51,7 @@ public class GoogleSignInHandlerService {
                     .show();
             e.printStackTrace();
             Log.e(TAG, "handleSignInResult: "+e.getStatusCode());
+            progressBar.setVisibility(View.INVISIBLE);
         }
     }
     public void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
