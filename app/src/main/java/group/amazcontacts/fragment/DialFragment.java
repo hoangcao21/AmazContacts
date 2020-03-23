@@ -199,6 +199,7 @@ public class DialFragment extends Fragment {
         }
     }
 
+    // TODO: Chỉnh sửa lại query
     public static List<Contact> getContacts(Context ctx, String phoneNumberToFind) {
         List<Contact> list = new ArrayList<>();
 

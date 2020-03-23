@@ -67,6 +67,16 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mapping();
 
+        // Test firebase getUid() returns Firebase user'id on Firebase Authentication
+//        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+//        Log.i("FIREBASE: ", currentUser.getEmail());
+//
+//        FirebaseDatabase database = FirebaseDatabase.getInstance();
+//        Log.i("FIREBASE-REF: ", database.getReference().toString());
+//        DatabaseReference myRef = database.getReference();
+//        myRef.child("contacts").child(currentUser.getUid()).setValue("OK");
+//        myRef.child("contacts").child(currentUser.getUid() + "LOL").setValue("OK");
+
 
         SharedPreferences pref = getApplicationContext().getSharedPreferences("AmazContacts", MODE_PRIVATE); // 0 - for private mode
         SharedPreferences.Editor editor = pref.edit();
@@ -231,7 +241,8 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){
             case R.id.action_setting:
-
+                Intent intent = new Intent(getApplicationContext(), SettingActivity.class);
+                startActivityForResult(intent, 100);
                 break;
             case R.id.action_log_out:
                 FirebaseAuth.getInstance().signOut();
