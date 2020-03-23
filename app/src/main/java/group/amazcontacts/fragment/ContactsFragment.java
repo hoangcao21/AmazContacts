@@ -259,6 +259,7 @@ public class ContactsFragment extends Fragment {
 
         public ContactsUpdateUI(Activity activity) {
             this.activity = activity;
+            this.searchKey = "";
         }
 
         public ContactsUpdateUI(Activity activity, String searchKey) {
