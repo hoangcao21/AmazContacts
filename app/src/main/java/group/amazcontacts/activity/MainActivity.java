@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -56,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     private TabLayout tabLayout;
     private ViewPager viewPager;
     private static Toolbar toolbar;
+    private SearchView searchView;
     private ContactsFragment contactsFragment;
     private final int REQUEST_PERMISSION_CODE = 100;
     private boolean isReadContactsPermissionGranted;
@@ -157,6 +159,7 @@ public class MainActivity extends AppCompatActivity {
                 // Nếu là ở tab khác tab Dial, thì hiển thị search view
                 MenuItem searchMenuItem = mainMenu.findItem(R.id.action_search);
                 searchMenuItem.setVisible(true);
+                searchView.setVisibility(View.VISIBLE);
 
                 // This is needed if the user
                 if (!isReadContactsPermissionGranted || !isCallPhonePermissionGranted || !isWriteContactsPermissionGranted) {
@@ -179,6 +182,7 @@ public class MainActivity extends AppCompatActivity {
                     DialFragment.isPermissionsGranted();
                     // Dấu search view khi vào tab Dial Fragment
                     searchMenuItem.setVisible(false);
+                    searchView.setVisibility(View.GONE);
                 }
             }
 
@@ -223,7 +227,7 @@ public class MainActivity extends AppCompatActivity {
 
         MenuItem menuItem = menu.findItem(R.id.action_search);
         menuItem.setVisible(false);
-        SearchView searchView = (SearchView) menuItem.getActionView();
+        searchView = (SearchView) menuItem.getActionView();
         searchView.setQueryHint("Search");
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             ListView contactListView = ContactsFragment.getListView();
