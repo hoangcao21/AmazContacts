@@ -38,6 +38,7 @@ import group.amazcontacts.R;
 import group.amazcontacts.activity.MainActivity;
 import group.amazcontacts.adapter.ContactAdapter;
 import group.amazcontacts.model.Contact;
+import group.amazcontacts.model.PhoneNumber;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -210,12 +211,11 @@ public class ContactsFragment extends Fragment {
 
 
                     Contact contact = new Contact();
-                    List<List<String>> phoneNumbers = new ArrayList<>();
+                    List<PhoneNumber> phoneNumbers = new ArrayList<>();
                     int count = 0;
 
                     assert cursorInfo != null;
                     while (cursorInfo.moveToNext()) {
-                        // TODO: Bổ sung thêm favored (Starred) contacts
                         if (count == 0) { // Many contacts has the same ID will be converted to ONLY one contact
                             contact.setId(id);
                             contact.setName(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)));
@@ -232,9 +232,7 @@ public class ContactsFragment extends Fragment {
                         String type = cursorInfo.getString(cursorInfo.getColumnIndex(ContactsContract.CommonDataKinds.
                                 Phone.TYPE));
 
-                        List<String> phoneAndType = new ArrayList<>(); // FORMAT: TYPE, PHONE_NUMBER
-                        phoneAndType.add(type);
-                        phoneAndType.add(phoneNumber.replace(" ", ""));
+                        PhoneNumber phoneAndType = new PhoneNumber(type, phoneNumber.replace(" ", ""));// FORMAT: TYPE, PHONE_NUMBER
 
                         phoneNumbers.add(phoneAndType);
                         count = 1;

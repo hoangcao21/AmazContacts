@@ -7,7 +7,7 @@ public class Contact {
     private String email;
     private String avatar_url;
     private String name;
-    private List<List<String>> phoneNumbers; // 1st phone number is the main number, 2nd phone number is optional.
+    private List<PhoneNumber> phoneNumbers; // 1st phone number is the main number, 2nd phone number is optional.
     // When on display, the 1st phone number is shown
     private boolean isFavored;
 
@@ -15,7 +15,7 @@ public class Contact {
 
     }
 
-    public Contact(String id, String email, String avatar_url, String name, List<List<String>> phoneNumbers, boolean isFavored) {
+    public Contact(String id, String email, String avatar_url, String name, List<PhoneNumber> phoneNumbers, boolean isFavored) {
         this.id = id;
         this.email = email;
         this.avatar_url = avatar_url;
@@ -56,11 +56,11 @@ public class Contact {
         this.name = name;
     }
 
-    public List<List<String>> getPhoneNumbers() {
+    public List<PhoneNumber> getPhoneNumbers() {
         return phoneNumbers;
     }
 
-    public void setPhoneNumbers(List<List<String>> phoneNumbers) {
+    public void setPhoneNumbers(List<PhoneNumber> phoneNumbers) {
         this.phoneNumbers = phoneNumbers;
     }
 

@@ -2,13 +2,10 @@ package group.amazcontacts.fragment;
 
 import android.app.Activity;
 import android.content.ContentResolver;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -26,7 +23,6 @@ import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -34,6 +30,7 @@ import java.util.Objects;
 import group.amazcontacts.R;
 import group.amazcontacts.adapter.ContactAdapter;
 import group.amazcontacts.model.Contact;
+import group.amazcontacts.model.PhoneNumber;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -42,8 +39,6 @@ import group.amazcontacts.model.Contact;
  */
 public class DialFragment extends Fragment {
 
-
-    // TODO: Implent DIalFragment
     private static List<Contact> contactList;
     private static ListView dialListView;
     private Button btnCall;
@@ -202,7 +197,7 @@ public class DialFragment extends Fragment {
         }
     }
 
-    // TODO: Chỉnh sửa lại query
+    // TODO: Chỉnh sửa lại query cho giống với query bên ContactFragment
     public static List<Contact> getContacts(Context ctx, String phoneNumberToFind) {
         List<Contact> list = new ArrayList<>();
 
@@ -230,7 +225,7 @@ public class DialFragment extends Fragment {
                 photo = BitmapFactory.decodeStream(inputStream);
             }
             */
-            List<List<String>> phoneNumbers = new ArrayList<>();
+            List<PhoneNumber> phoneNumbers = new ArrayList<>();
 
             contact.setId(id);
             String prevName = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
@@ -250,9 +245,7 @@ public class DialFragment extends Fragment {
                     Phone.TYPE));
             String name;
 
-            List<String> phoneAndType = new ArrayList<>(); // FORMAT: TYPE, PHONE_NUMBER
-            phoneAndType.add(type);
-            phoneAndType.add(phoneNumber.replace(" ", ""));
+            PhoneNumber phoneAndType = new PhoneNumber(type, phoneNumber.replace(" ", "")); // FORMAT: TYPE, PHONE_NUMBER
             phoneNumbers.add(phoneAndType);
             contact.setPhoneNumbers(phoneNumbers);
             list.add(contact);
@@ -266,9 +259,7 @@ public class DialFragment extends Fragment {
                     type = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.
                             Phone.TYPE));
 
-                    phoneAndType = new ArrayList<>(); // FORMAT: TYPE, PHONE_NUMBER
-                    phoneAndType.add(type);
-                    phoneAndType.add(phoneNumber.replace(" ", ""));
+                    phoneAndType = new PhoneNumber(type, phoneNumber.replace(" ", "")); // FORMAT: TYPE, PHONE_NUMBER
                     phoneNumbers.add(phoneAndType);
                     contact.setPhoneNumbers(phoneNumbers);
                 } else {
@@ -305,9 +296,7 @@ public class DialFragment extends Fragment {
                     type = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.
                             Phone.TYPE));
 
-                    phoneAndType = new ArrayList<>(); // FORMAT: TYPE, PHONE_NUMBER
-                    phoneAndType.add(type);
-                    phoneAndType.add(phoneNumber.replace(" ", ""));
+                    phoneAndType = new PhoneNumber(type, phoneNumber.replace(" ", "")); // FORMAT: TYPE, PHONE_NUMBER
                     phoneNumbers.add(phoneAndType);
                     contact.setPhoneNumbers(phoneNumbers);
                 }

@@ -61,7 +61,7 @@ public class ContactAdapter extends BaseAdapter {
         Glide.with(activity.getApplicationContext()).
                 load(contact.getAvatar_url()).
                 into(imageViewAvatar);
-        textViewPhone.setText(contact.getPhoneNumbers().get(0).get(1)); // Only 1st phone number is shown, only 'Info' shows all phone numbers
+        textViewPhone.setText(contact.getPhoneNumbers().get(0).getPhoneNumber()); // Only 1st phone number is shown, only 'Info' shows all phone numbers
 
 
         return convertView;

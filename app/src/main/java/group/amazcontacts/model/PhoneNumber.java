@@ -1,36 +1,20 @@
 package group.amazcontacts.model;
 
-import group.amazcontacts.constant.PhoneType;
-
 public class PhoneNumber {
-    private PhoneType phoneType;
-    private String Description;
+    private String phoneType;
     private String phoneNumber;
 
-    public PhoneNumber() {
-        phoneType = PhoneType.PRIMARY;
-    }
-
-    public PhoneNumber(PhoneType phoneType, String description, String phoneNumber) {
+    public PhoneNumber(String phoneType, String phoneNumber) {
         this.phoneType = phoneType;
-        Description = description;
         this.phoneNumber = phoneNumber;
     }
 
-    public PhoneType getPhoneType() {
+    public String getPhoneType() {
         return phoneType;
     }
 
-    public void setPhoneType(PhoneType phoneType) {
+    public void setPhoneType(String phoneType) {
         this.phoneType = phoneType;
-    }
-
-    public String getDescription() {
-        return Description;
-    }
-
-    public void setDescription(String description) {
-        Description = description;
     }
 
     public String getPhoneNumber() {
