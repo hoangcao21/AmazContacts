@@ -266,7 +266,7 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), "Sign out from gmail",Toast.LENGTH_LONG).show();
                     }
                 });
-                Intent i = new Intent(getApplicationContext(), SignUpActivity.class);
+                Intent i = new Intent(getApplicationContext(), LoginActivity.class);
                 i.putExtra(SignUpActivity.NO_LOGIN_SILENT, false);
 
                 SharedPreferences sharedPreferences = getSharedPreferences("data", MODE_PRIVATE);

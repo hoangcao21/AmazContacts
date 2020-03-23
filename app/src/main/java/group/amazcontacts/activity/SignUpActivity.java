@@ -30,7 +30,6 @@ import group.amazcontacts.service.GoogleSignInHandlerService;
 public class SignUpActivity extends AppCompatActivity {
     private EditText emailEditText , passwordEditText;
     private Button signUpButton;
-    private SignInButton signUpWithGoogleButton;
     private ProgressBar progressBar;
     private FirebaseAuth firebaseAuth;
     private GoogleSignInOptions gso;
@@ -70,15 +69,7 @@ public class SignUpActivity extends AppCompatActivity {
                         });
             }
         });
-        signUpWithGoogleButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                progressBar.setVisibility(View.VISIBLE);
-                GoogleSignInClient mGoogleSignInClient = GoogleSignIn.getClient(getApplicationContext() , gso);
-                Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-                startActivityForResult(signInIntent, RC_SIGN_IN);
-            }
-        });
+
     }
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -123,7 +114,7 @@ public class SignUpActivity extends AppCompatActivity {
         emailEditText = findViewById(R.id.emailEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
         signUpButton = findViewById(R.id.signupButton);
-        signUpWithGoogleButton = findViewById(R.id.signinWithGoogle);
-        progressBar = findViewById(R.id.progressBar);
+
+        progressBar = findViewById(R.id.loadingBar);
     }
 }

@@ -28,7 +28,7 @@ public class SplashActivity extends Activity {
                 Intent mainIntent = new Intent(SplashActivity.this,MainActivity.class);
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                 if (user == null) {
-                    Intent signUpIntent = new Intent(SplashActivity.this, SignUpActivity.class);
+                    Intent signUpIntent = new Intent(SplashActivity.this, LoginActivity.class);
                     startActivity(signUpIntent);
                 } else {
                     SplashActivity.this.startActivity(mainIntent);
