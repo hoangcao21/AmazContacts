@@ -8,8 +8,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -21,6 +23,8 @@ import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.util.ArrayList;
+
 import group.amazcontacts.R;
 
 public class SettingActivity extends AppCompatActivity {
@@ -28,6 +32,7 @@ public class SettingActivity extends AppCompatActivity {
     private TextView textViewName;
     private TextView textViewEmail;
     private Button btnSignOut;
+    private Spinner spinnerTheme;
 
     // Download & Import section
     private Button btnBackupContact;
@@ -55,6 +60,7 @@ public class SettingActivity extends AppCompatActivity {
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.setStatusBarColor(ContextCompat.getColor(getApplicationContext(), R.color.transparent));
 
+        spinnerTheme = findViewById(R.id.spinnerTheme);
         profileAvatar = findViewById(R.id.imgProfileAvatar);
         textViewName = findViewById(R.id.textViewName);
         textViewEmail = findViewById(R.id.textViewEmail);
@@ -111,5 +117,22 @@ public class SettingActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    public void addThemeListToSpinner(ArrayList<Integer> list) {
+        ArrayAdapter<Integer> adapter = new ArrayAdapter<>(this, R.layout.support_simple_spinner_dropdown_item, list);
+        spinnerTheme.setAdapter(adapter);
+    }
+
+    public ArrayList<Integer> generateDummyThemes(){
+        ArrayList<Integer> listThemes = new ArrayList<>();
+        int s1 = R.color.colorAccent;
+        int s2 = R.color.bananaYellow;
+        int s3 = R.color.replyOrange;
+        listThemes.add(s1);
+        listThemes.add(s2);
+        listThemes.add(s3);
+//        listThemes.add(s4);
+        return listThemes;
     }
 }
