@@ -13,6 +13,7 @@ import java.util.List;
 
 import group.amazcontacts.R;
 import group.amazcontacts.model.Contact;
+import group.amazcontacts.model.PhoneNumber;
 
 public class ContactAdapter extends BaseAdapter {
     private List<Contact> contactList;
@@ -61,7 +62,9 @@ public class ContactAdapter extends BaseAdapter {
         Glide.with(activity.getApplicationContext()).
                 load(contact.getAvatar_url()).
                 into(imageViewAvatar);
-        textViewPhone.setText(contact.getPhoneNumbers().get(0).getPhoneNumber()); // Only 1st phone number is shown, only 'Info' shows all phone numbers
+        List<PhoneNumber> mainPhoneNumber = contact.getPhoneNumbers();
+        if (!mainPhoneNumber.isEmpty())
+            textViewPhone.setText(mainPhoneNumber.get(0).getPhoneNumber()); // Only 1st phone number is shown, only 'Info' shows all phone numbers
 
 
         return convertView;

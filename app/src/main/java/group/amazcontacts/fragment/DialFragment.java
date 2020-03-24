@@ -1,10 +1,12 @@
 package group.amazcontacts.fragment;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -213,18 +215,6 @@ public class DialFragment extends Fragment {
             Contact contact = new Contact();
 
             String id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
-            /*
-            InputStream inputStream = ContactsContract.Contacts.openContactPhotoInputStream(ctx.getContentResolver(),
-                    ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, new Long(id)));
-
-            Uri person = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, new Long(id));
-            Uri pURI = Uri.withAppendedPath(person, ContactsContract.Contacts.Photo.CONTENT_DIRECTORY);
-
-            Bitmap photo = null;
-            if (inputStream != null) {
-                photo = BitmapFactory.decodeStream(inputStream);
-            }
-            */
             List<PhoneNumber> phoneNumbers = new ArrayList<>();
 
             contact.setId(id);
@@ -232,12 +222,14 @@ public class DialFragment extends Fragment {
             contact.setName(prevName);
             boolean isFavored = (cursor.getInt(cursor.getColumnIndex(ContactsContract.Contacts.STARRED)) == 1);
             contact.setFavored(isFavored);
-            /*
-            if (photo != null)
-                contact.setAvatar_url(pURI.toString());
+
+            String image_uri = cursor.getString(cursor.getColumnIndex(
+                    ContactsContract.CommonDataKinds.Phone.PHOTO_URI));
+            if (image_uri != null)
+                contact.setAvatar_url(image_uri);
             else
-            */
-            contact.setAvatar_url(Uri.parse("android.resource://group.amazcontacts/" + R.mipmap.default_contact_avatar).toString());
+                contact.setAvatar_url(Uri.parse("android.resource://group.amazcontacts/" + R.mipmap.default_contact_avatar).toString());
+
 
             String phoneNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.
                     Phone.NUMBER));
@@ -264,32 +256,19 @@ public class DialFragment extends Fragment {
                     contact.setPhoneNumbers(phoneNumbers);
                 } else {
                     contact = new Contact();
-
-                    id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
-                    /*
-                    inputStream = ContactsContract.Contacts.openContactPhotoInputStream(ctx.getContentResolver(),
-                            ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, new Long(id)));
-
-                    person = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, new Long(id));
-                    pURI = Uri.withAppendedPath(person, ContactsContract.Contacts.Photo.CONTENT_DIRECTORY);
-
-                    photo = null;
-                    if (inputStream != null) {
-                        photo = BitmapFactory.decodeStream(inputStream);
-                    }
-                    */
                     phoneNumbers = new ArrayList<>();
 
                     contact.setId(id);
-                    contact.setName(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)));
+                    contact.setName(name);
                     isFavored = (cursor.getInt(cursor.getColumnIndex(ContactsContract.Contacts.STARRED)) == 1);
                     contact.setFavored(isFavored);
-                    /*
-                    if (photo != null)
-                        contact.setAvatar_url(pURI.toString());
+
+                    image_uri = cursor.getString(cursor.getColumnIndex(
+                            ContactsContract.CommonDataKinds.Phone.PHOTO_URI));
+                    if (image_uri != null)
+                        contact.setAvatar_url(image_uri);
                     else
-                    */
-                    contact.setAvatar_url(Uri.parse("android.resource://group.amazcontacts/" + R.mipmap.default_contact_avatar).toString());
+                        contact.setAvatar_url(Uri.parse("android.resource://group.amazcontacts/" + R.mipmap.default_contact_avatar).toString());
 
                     phoneNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.
                             Phone.NUMBER));

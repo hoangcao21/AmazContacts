@@ -185,7 +185,6 @@ public class SettingActivity extends AppCompatActivity {
         int WRITE_CONTACTS_PERMISSION = ContextCompat.checkSelfPermission(SettingActivity.this,
                 Manifest.permission.WRITE_CONTACTS);
         return READ_CONTACTS_PERMISSION != -1 && WRITE_CONTACTS_PERMISSION != -1;
-
     }
 
     private ImageView imageView;
@@ -328,7 +327,7 @@ public class SettingActivity extends AppCompatActivity {
 
         @Override
         protected void onPreExecute() {
-            dialog.setMessage("Backing up your contacts on the could, please wait...");
+            dialog.setMessage("Download your contacts on the could, please wait...");
             dialog.setCancelable(false);
             dialog.show();
         }
@@ -536,14 +535,7 @@ public class SettingActivity extends AppCompatActivity {
                 public void onCancelled(DatabaseError databaseError) {
                 }
             });
-
-            while (true) {
-                if (dataChangedDone) {
-                    dataChangedDone = false;
-                    break;
-                }
-            }
-            return null;
+            return "OK";
         }
 
 
