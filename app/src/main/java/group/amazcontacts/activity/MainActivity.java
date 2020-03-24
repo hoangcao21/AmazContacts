@@ -6,8 +6,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.ShapeDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -17,6 +23,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
@@ -41,6 +48,7 @@ import group.amazcontacts.adapter.ViewPagerAdapter;
 import group.amazcontacts.fragment.ContactsFragment;
 import group.amazcontacts.fragment.DialFragment;
 import group.amazcontacts.fragment.FavoritesFragment;
+import group.amazcontacts.model.AmazTheme;
 
 /*
  * https://docs.google.com/document/d/1sP5KD_XXHOblEPt25EoaZcFrQHEWvK0knfX1phlpCJU/edit?fbclid=IwAR0b0Zt5IQBWt1iFb3zx7UbjQlB9rQEmjLle8U5bvhb5X_-1Fci6oKP-J38&pli=1
@@ -67,6 +75,9 @@ public class MainActivity extends AppCompatActivity {
     private static boolean isWriteContactsPermissionGranted;
     private static int tabPosition; // Used when permission granted (cấp quyền thành công) at ContactsFragment
 
+    public static int REQUEST_CODE_TO_SETTINGS = 200;
+    public static int RESULT_CODE_FROM_SETTINGS = 201;
+
     public static Toolbar getToolbar() {
         return toolbar;
     }
@@ -85,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
         setupViews();
 
     }
+
 
     private boolean firstInitial = false;
 
@@ -175,8 +187,13 @@ public class MainActivity extends AppCompatActivity {
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         Objects.requireNonNull(this.getSupportActionBar()).setDisplayHomeAsUpEnabled(false);
-        toolbar.setBackgroundColor(getResources().getColor(R.color.colorAccent));
+        toolbar.setBackgroundColor(getResources().getColor(R.color.blueAccent));
 
+    }
+
+    public void changeToolbarColor(int color){
+        toolbar.setBackgroundColor(getResources().getColor(color));
+        Log.i("test", "change color success");
     }
 
     private Menu mainMenu;
@@ -217,7 +234,7 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.action_setting:
                 Intent intent = new Intent(getApplicationContext(), SettingActivity.class);
-                startActivityForResult(intent, 100);
+                startActivityForResult(intent, REQUEST_CODE_TO_SETTINGS);
                 break;
             case R.id.action_log_out:
                 // firebase signout
@@ -353,6 +370,15 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_TO_SETTINGS && resultCode == RESULT_CODE_FROM_SETTINGS) {
+            int color = data.getIntExtra("color", AmazTheme.BLUE_ACCENT);
+            changeToolbarColor(color);
+            Log.i("test", "get result successfully");
+        }
+    }
 
     class ContactsUpdateUI extends AsyncTask<String, String, String> {
 

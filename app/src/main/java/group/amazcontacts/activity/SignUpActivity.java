@@ -125,7 +125,7 @@ public class SignUpActivity extends AppCompatActivity {
         // HoangCH thêm vào để đồng nhất màu sắc giao diện
         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         ActionBar bar = getSupportActionBar();
-        int color = ContextCompat.getColor(getApplicationContext(), R.color.colorAccent);
+        int color = ContextCompat.getColor(getApplicationContext(), R.color.blueAccent);
 
         bar.setBackgroundDrawable(new ColorDrawable(color));
         bar.setTitle(Html.fromHtml("<font color=\"black\">" + getString(R.string.app_name) + "</font>"));

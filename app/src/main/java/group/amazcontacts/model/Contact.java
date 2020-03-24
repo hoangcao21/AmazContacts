@@ -1,8 +1,9 @@
 package group.amazcontacts.model;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Contact {
+public class Contact implements Serializable {
     private String id;
     private String email;
     private String avatar_url;

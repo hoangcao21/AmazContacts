@@ -31,7 +31,7 @@
         app:layout_constraintTop_toBottomOf="@+id/emailEditText" />
 
     <Button
-        android:id="@+id/buttonLogin "
+        android:id="@+id/buttonLogin"
         android:layout_width="256dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="36dp"
@@ -60,7 +60,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonLogin " />
+        app:layout_constraintTop_toBottomOf="@id/buttonLogin" />
 
     <com.google.android.gms.common.SignInButton
         android:id="@+id/signInWithGoogleButton"
