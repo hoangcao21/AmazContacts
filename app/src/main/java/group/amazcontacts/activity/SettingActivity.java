@@ -5,20 +5,24 @@ import android.app.ProgressDialog;
 import android.content.ContentProviderOperation;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.shapes.Shape;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.Html;
 import android.util.Log;
+import android.util.Pair;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -58,6 +62,8 @@ import java.util.Objects;
 import group.amazcontacts.R;
 import group.amazcontacts.adapter.ContactAdapter;
 import group.amazcontacts.fragment.ContactsFragment;
+import group.amazcontacts.fragment.DialFragment;
+import group.amazcontacts.model.AmazTheme;
 import group.amazcontacts.model.Contact;
 import group.amazcontacts.model.PhoneNumber;
 
@@ -67,6 +73,8 @@ public class SettingActivity extends AppCompatActivity {
     private TextView textViewEmail;
     private Button btnSignOut;
     private Spinner spinnerTheme;
+    public static int THEME_COLOR = 0;
+
 
     // Download & Import section
     private Button btnBackupContact;
@@ -94,7 +102,7 @@ public class SettingActivity extends AppCompatActivity {
     private void mappingViews() {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         ActionBar bar = getSupportActionBar();
-        int color = ContextCompat.getColor(getApplicationContext(), R.color.colorAccent);
+        int color = ContextCompat.getColor(getApplicationContext(), R.color.blueAccent);
 
         bar.setBackgroundDrawable(new ColorDrawable(color));
         bar.setTitle(Html.fromHtml("<font color=\"black\">" + getString(R.string.app_name) + "</font>"));
@@ -105,7 +113,10 @@ public class SettingActivity extends AppCompatActivity {
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.setStatusBarColor(ContextCompat.getColor(getApplicationContext(), R.color.transparent));
 
+        //add themes to spinner
         spinnerTheme = findViewById(R.id.spinnerTheme);
+        addThemeListToSpinner(generateThemes());
+
         profileAvatar = findViewById(R.id.imgProfileAvatar);
         textViewName = findViewById(R.id.textViewName);
         textViewEmail = findViewById(R.id.textViewEmail);
@@ -175,6 +186,19 @@ public class SettingActivity extends AppCompatActivity {
                 } else {
                     MainActivity.requestPermissions(1, getApplicationContext(), SettingActivity.this); // No need CALL_PHONE permission
                 }
+            }
+        });
+
+        spinnerTheme.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                AmazTheme selected = (AmazTheme) spinnerTheme.getItemAtPosition(position);
+                SettingActivity.changeTheme(selected);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
             }
         });
     }
@@ -756,20 +780,41 @@ public class SettingActivity extends AppCompatActivity {
 //    }
 
 
-    public void addThemeListToSpinner(ArrayList<Integer> list) {
-        ArrayAdapter<Integer> adapter = new ArrayAdapter<>(this, R.layout.support_simple_spinner_dropdown_item, list);
+    public void addThemeListToSpinner(ArrayList<AmazTheme> list) {
+        ArrayAdapter<AmazTheme> adapter = new ArrayAdapter<>(this, R.layout.support_simple_spinner_dropdown_item, list);
         spinnerTheme.setAdapter(adapter);
     }
 
-    public ArrayList<Integer> generateDummyThemes() {
-        ArrayList<Integer> listThemes = new ArrayList<>();
-        int s1 = R.color.colorAccent;
-        int s2 = R.color.bananaYellow;
-        int s3 = R.color.replyOrange;
+    public ArrayList<AmazTheme> generateThemes() {
+        ArrayList<AmazTheme> listThemes = new ArrayList<>();
+        AmazTheme s1 = new AmazTheme("Blue Accent", AmazTheme.BLUE_ACCENT);
+        AmazTheme s2 = new AmazTheme("Banana Yellow", AmazTheme.BANANA_YELLOW);
+        AmazTheme s3 = new AmazTheme("Reply Orange", AmazTheme.REPLY_ORANGE);
         listThemes.add(s1);
         listThemes.add(s2);
         listThemes.add(s3);
-//        listThemes.add(s4);
         return listThemes;
     }
+
+    public static void changeTheme(AmazTheme amazTheme) {
+        changeTheme(amazTheme.getColor());
+    }
+
+    public static void changeTheme(int color) {
+        DialFragment.changeDialColor(color);
+        THEME_COLOR = color;
+        Log.i("test", "THEME_COLOR = " + THEME_COLOR);
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent();
+        if (THEME_COLOR != 0) intent.putExtra("color", THEME_COLOR);
+        setResult(MainActivity.RESULT_CODE_FROM_SETTINGS, intent);
+        finish();
+        super.onBackPressed();
+    }
+
+
+
 }
