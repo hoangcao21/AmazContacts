@@ -1,6 +1,8 @@
 package group.amazcontacts.model;
 
-public class PhoneNumber {
+import java.io.Serializable;
+
+public class PhoneNumber implements Serializable {
     private String phoneType;
     private String phoneNumber;
 

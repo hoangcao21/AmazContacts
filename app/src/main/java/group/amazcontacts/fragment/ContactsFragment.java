@@ -7,10 +7,12 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -24,18 +26,23 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import group.amazcontacts.R;
+import group.amazcontacts.activity.ContactDetailActivity;
 import group.amazcontacts.activity.MainActivity;
 import group.amazcontacts.adapter.ContactAdapter;
 import group.amazcontacts.model.Contact;
@@ -69,10 +76,11 @@ public class ContactsFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(LayoutInflater inflater, final ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.contacts_fragment, container, false);
+        View v = inflater.inflate(R.layout.contacts_fragment, container, false);
+        return v;
     }
 
     @Override
@@ -144,6 +152,26 @@ public class ContactsFragment extends Fragment {
             public void onDestroyActionMode(ActionMode mode) {
                 MainActivity.getToolbar().setVisibility(View.VISIBLE);
                 listPositions.clear();
+            }
+
+
+        });
+        contactListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent i = new Intent(parent.getContext(), ContactDetailActivity.class);
+                // data
+                i.putExtra("contact",contactList.get(position));
+                // avatar
+                ImageView im =  view.findViewById(R.id.contact_avatar);
+                Bitmap bm = ((BitmapDrawable)im.getDrawable()).getBitmap();
+
+                ByteArrayOutputStream bStream = new ByteArrayOutputStream();
+                bm.compress(Bitmap.CompressFormat.PNG, 100, bStream);
+                byte[] byteArray = bStream.toByteArray();
+                i.putExtra("avatar",byteArray);
+
+                startActivity(i);
             }
         });
         setContacts(getContext(), getActivity());
