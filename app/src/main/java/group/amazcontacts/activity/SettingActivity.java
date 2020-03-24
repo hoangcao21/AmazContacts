@@ -139,7 +139,7 @@ public class SettingActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            setResult(100);
+            setResult(MainActivity.RESULT_CODE_FROM_SETTINGS);
             finish();
         }
         return true;
@@ -566,8 +566,9 @@ public class SettingActivity extends AppCompatActivity {
                 dialog.dismiss();
             }
 
-            if (s.equals("OK"))
+            if (s.equals("OK")) {
                 Toast.makeText(getApplicationContext(), "Download successfully!", Toast.LENGTH_LONG).show();
+            }
         }
     }
 

@@ -6,11 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.ShapeDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -186,6 +181,7 @@ public class MainActivity extends AppCompatActivity {
 
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
         Objects.requireNonNull(this.getSupportActionBar()).setDisplayHomeAsUpEnabled(false);
         toolbar.setBackgroundColor(getResources().getColor(R.color.blueAccent));
 
@@ -374,9 +370,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_TO_SETTINGS && resultCode == RESULT_CODE_FROM_SETTINGS) {
-            int color = data.getIntExtra("color", AmazTheme.BLUE_ACCENT);
-            changeToolbarColor(color);
-            Log.i("test", "get result successfully");
+            if (data != null) {
+                int color = data.getIntExtra("color", AmazTheme.BLUE_ACCENT);
+                changeToolbarColor(color);
+                Log.i("test", "get result successfully");
+            } else { // data == null trường hợp của HoangCH
+                ContactsFragment.setContacts(getApplicationContext(), MainActivity.this);
+            }
         }
     }
 
