@@ -16,7 +16,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
-import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,7 +36,6 @@ import java.util.Objects;
 
 import group.amazcontacts.R;
 import group.amazcontacts.adapter.ContactAdapter;
-import group.amazcontacts.model.AmazTheme;
 import group.amazcontacts.model.Contact;
 import group.amazcontacts.model.PhoneNumber;
 
