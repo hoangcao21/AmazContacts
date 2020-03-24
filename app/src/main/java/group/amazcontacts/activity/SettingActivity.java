@@ -1,14 +1,18 @@
 package group.amazcontacts.activity;
 
+import android.Manifest;
 import android.app.ProgressDialog;
+import android.content.ContentProviderOperation;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.text.Html;
 import android.util.Log;
 import android.view.MenuItem;
@@ -20,6 +24,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -42,7 +47,10 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -149,19 +157,38 @@ public class SettingActivity extends AppCompatActivity {
         btnBackupContact.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new BackupContactsTask().execute();
+                boolean isFullPermissions = isFullPermissions();
+                if (isFullPermissions) {
+                    new BackupContactsTask().execute();
+                } else {
+                    MainActivity.requestPermissions(1, getApplicationContext(), SettingActivity.this); // No need CALL_PHONE permission
+                }
             }
         });
 
         btnDownloadContact.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                boolean isFullPermissions = isFullPermissions();
+                if (isFullPermissions) {
+                    new DownloadContactsTask().execute();
+                } else {
+                    MainActivity.requestPermissions(1, getApplicationContext(), SettingActivity.this); // No need CALL_PHONE permission
+                }
             }
         });
     }
 
-    ImageView imageView;
+    private boolean isFullPermissions() {
+        int READ_CONTACTS_PERMISSION = ContextCompat.checkSelfPermission(SettingActivity.this,
+                Manifest.permission.READ_CONTACTS);
+        int WRITE_CONTACTS_PERMISSION = ContextCompat.checkSelfPermission(SettingActivity.this,
+                Manifest.permission.WRITE_CONTACTS);
+        return READ_CONTACTS_PERMISSION != -1 && WRITE_CONTACTS_PERMISSION != -1;
+
+    }
+
+    private ImageView imageView;
 
 
     class BackupContactsTask extends AsyncTask<String, String, String> {
@@ -188,8 +215,6 @@ public class SettingActivity extends AppCompatActivity {
             int count = 0;
 
             DatabaseReference databaseReference = firebaseDatabase.getReference("contacts");
-
-            InputStream uploadStream = null;
 
             FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
             DatabaseReference itemsRef = databaseReference.child(firebaseUser.getUid()).child("items");
@@ -236,6 +261,8 @@ public class SettingActivity extends AppCompatActivity {
 
                 while (true) {
                     if (downloadUri[0] != null) {
+                        Log.i("BACK UP CONTACTS: Display Name:", contact.getName() + " - Phone Number: " +
+                                contact.getPhoneNumbers().get(0).getPhoneNumber() + " - Uploaded Aavatar: " + downloadUri[0].toString());
                         contactRef.child("avatar_url").setValue(downloadUri[0].toString());
                         contactRef.child("name").setValue(contact.getName());
                         contactRef.child("phoneNumbers").setValue(contact.getPhoneNumbers());
@@ -243,7 +270,7 @@ public class SettingActivity extends AppCompatActivity {
                     }
                 }
             }
-            Log.i("BACK UP CONTACTS: ", "DONE");
+
             return null;
         }
 
@@ -252,24 +279,63 @@ public class SettingActivity extends AppCompatActivity {
             if (dialog.isShowing()) {
                 dialog.dismiss();
             }
+            Toast.makeText(getApplicationContext(), "Back up successfully!", Toast.LENGTH_LONG).show();
         }
     }
 
-    // TODO: Làm downloadcontact nốt
-    class DownloadContactsTask extends AsyncTask<String, String, String> {
-        private ContactAdapter contactAdapter;
-        private String searchKey;
 
-        public DownloadContactsTask() {
-            this.searchKey = "";
+    class FetchImageFromServerTask extends AsyncTask<String, String, String> {
+        private Contact contact;
+
+        public FetchImageFromServerTask(Contact contact) {
+            this.contact = contact;
         }
 
-        public DownloadContactsTask(String searchKey) {
-            this.searchKey = searchKey;
+        @Override
+        protected String doInBackground(String... urls) {
+            URL url = null;
+            HttpURLConnection connection = null;
+            try {
+
+                url = new URL(contact.getAvatar_url());
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setDoInput(true);
+                connection.connect();
+                InputStream input = connection.getInputStream();
+                bitmap = BitmapFactory.decodeStream(input);
+                fetchImageDone = true;
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+
+        }
+    }
+
+    private boolean dataChangedDone;
+    class DownloadContactsTask extends AsyncTask<String, String, String> {
+        private ContactAdapter contactAdapter;
+        private ProgressDialog dialog;
+
+        public DownloadContactsTask() {
+            dialog = new ProgressDialog(SettingActivity.this);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            dialog.setMessage("Backing up your contacts on the could, please wait...");
+            dialog.setCancelable(false);
+            dialog.show();
         }
 
         @Override
         protected String doInBackground(String... strings) { // Only non-GUI task
+            contactList = new ArrayList<>();
             DatabaseReference databaseReference = firebaseDatabase.getReference("contacts");
             FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
             DatabaseReference itemsRef = databaseReference.child(firebaseUser.getUid()).child("items");
@@ -277,11 +343,192 @@ public class SettingActivity extends AppCompatActivity {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                        String id = snapshot.getKey();
-                        String avatar_url;
-                        String name;
-                        List<PhoneNumber> phoneNumbers;
-                        boolean isFavored;
+                        String id = snapshot.getKey(); // ID lấy về hiện tại là làm màu ))
+                        String name = snapshot.child("name").getValue(String.class);
+                        String avatar_url = snapshot.child("avatar_url").getValue(String.class);
+                        List<PhoneNumber> phoneNumbersList = new ArrayList<>();
+                        Iterable<DataSnapshot> phoneNumbers = snapshot.child("phoneNumbers").getChildren();
+
+                        for (DataSnapshot phoneNumber : phoneNumbers) {
+                            String type = phoneNumber.child("phoneType").getValue(String.class);
+                            String number = phoneNumber.child("phoneNumber").getValue(String.class);
+
+                            phoneNumbersList.add(new PhoneNumber(type, number));
+                        }
+
+                        Contact contact = new Contact(id, null, avatar_url, name, phoneNumbersList, false);
+                        contactList.add(contact);
+                        Log.i("DOWNLOAD CONTACTS: ", "Display Name: " + contact.getName() + ", Primary Phone: " + contact.getPhoneNumbers().get(0).getPhoneNumber());
+                    }
+
+                    if (!contactList.isEmpty()) {
+                        for (Contact contact : contactList) {
+                            ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+
+                            ops.add(ContentProviderOperation.newInsert(
+                                    ContactsContract.RawContacts.CONTENT_URI)
+                                    .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, null)
+                                    .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, null)
+                                    .build());
+
+                            //------------------------------------------------------ NAME
+                            if (!contact.getName().isEmpty()) {
+                                ops.add(ContentProviderOperation.newInsert(
+                                        ContactsContract.Data.CONTENT_URI)
+                                        .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+                                        .withValue(ContactsContract.Data.MIMETYPE,
+                                                ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+                                        .withValue(
+                                                ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME,
+                                                contact.getName()).build());
+                            }
+
+                            //------------------------------------------------------ AVATAR
+                            if (!contact.getAvatar_url().isEmpty()) {
+                                // START: Get bit map from image URL
+                                new FetchImageFromServerTask(contact).execute();
+
+                                while (true) {
+                                    if (fetchImageDone) {
+                                        break;
+                                    }
+                                }
+
+                                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                                bitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream);
+                                byte[] bitmapByteArray = stream.toByteArray();
+                                // END
+
+                                ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                                        .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+                                        .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE)
+                                        .withValue(ContactsContract.CommonDataKinds.Photo.PHOTO, bitmapByteArray)
+                                        .build());
+                                fetchImageDone = false;
+                            }
+
+                            for (PhoneNumber phoneNumber : contact.getPhoneNumbers()) {
+
+                                //------------------------------------------------------ MOBILE NUMBER
+                                if (phoneNumber.getPhoneType().equals(ContactsContract.CommonDataKinds.
+                                        Phone.TYPE_MOBILE + "")) {
+                                    ops.add(ContentProviderOperation.
+                                            newInsert(ContactsContract.Data.CONTENT_URI)
+                                            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+                                            .withValue(ContactsContract.Data.MIMETYPE,
+                                                    ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                                            .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phoneNumber.getPhoneNumber())
+                                            .withValue(ContactsContract.CommonDataKinds.Phone.TYPE,
+                                                    ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE)
+                                            .build());
+                                }
+
+                                //------------------------------------------------------ HOME NUMBER
+                                if (phoneNumber.getPhoneType().equals(ContactsContract.CommonDataKinds.
+                                        Phone.TYPE_HOME + "")) {
+                                    ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                                            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+                                            .withValue(ContactsContract.Data.MIMETYPE,
+                                                    ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                                            .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phoneNumber.getPhoneNumber())
+                                            .withValue(ContactsContract.CommonDataKinds.Phone.TYPE,
+                                                    ContactsContract.CommonDataKinds.Phone.TYPE_HOME)
+                                            .build());
+                                }
+
+                                //------------------------------------------------------ WORK NUMBER
+                                if (phoneNumber.getPhoneType().equals(ContactsContract.CommonDataKinds.
+                                        Phone.TYPE_WORK + "")) {
+                                    ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                                            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+                                            .withValue(ContactsContract.Data.MIMETYPE,
+                                                    ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                                            .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phoneNumber.getPhoneNumber())
+                                            .withValue(ContactsContract.CommonDataKinds.Phone.TYPE,
+                                                    ContactsContract.CommonDataKinds.Phone.TYPE_WORK)
+                                            .build());
+                                }
+
+                                //------------------------------------------------------ MAIN NUMBER
+                                if (phoneNumber.getPhoneType().equals(ContactsContract.CommonDataKinds.
+                                        Phone.TYPE_MAIN + "")) {
+                                    ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                                            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+                                            .withValue(ContactsContract.Data.MIMETYPE,
+                                                    ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                                            .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phoneNumber.getPhoneNumber())
+                                            .withValue(ContactsContract.CommonDataKinds.Phone.TYPE,
+                                                    ContactsContract.CommonDataKinds.Phone.TYPE_MAIN)
+                                            .build());
+                                }
+
+                                //------------------------------------------------------ WORK FAX
+                                if (phoneNumber.getPhoneType().equals(ContactsContract.CommonDataKinds.
+                                        Phone.TYPE_FAX_WORK + "")) {
+                                    ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                                            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+                                            .withValue(ContactsContract.Data.MIMETYPE,
+                                                    ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                                            .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phoneNumber.getPhoneNumber())
+                                            .withValue(ContactsContract.CommonDataKinds.Phone.TYPE,
+                                                    ContactsContract.CommonDataKinds.Phone.TYPE_FAX_WORK)
+                                            .build());
+                                }
+
+                                //------------------------------------------------------ HOME FAX
+                                if (phoneNumber.getPhoneType().equals(ContactsContract.CommonDataKinds.
+                                        Phone.TYPE_FAX_HOME + "")) {
+                                    ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                                            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+                                            .withValue(ContactsContract.Data.MIMETYPE,
+                                                    ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                                            .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phoneNumber.getPhoneNumber())
+                                            .withValue(ContactsContract.CommonDataKinds.Phone.TYPE,
+                                                    ContactsContract.CommonDataKinds.Phone.TYPE_FAX_HOME)
+                                            .build());
+                                }
+
+                                //------------------------------------------------------ PAGER
+                                if (phoneNumber.getPhoneType().equals(ContactsContract.CommonDataKinds.
+                                        Phone.TYPE_PAGER + "")) {
+                                    ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                                            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+                                            .withValue(ContactsContract.Data.MIMETYPE,
+                                                    ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                                            .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phoneNumber.getPhoneNumber())
+                                            .withValue(ContactsContract.CommonDataKinds.Phone.TYPE,
+                                                    ContactsContract.CommonDataKinds.Phone.TYPE_PAGER)
+                                            .build());
+                                }
+
+                                //------------------------------------------------------ OTHER
+                                if (phoneNumber.getPhoneType().equals(ContactsContract.CommonDataKinds.
+                                        Phone.TYPE_OTHER + "")) {
+                                    ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                                            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+                                            .withValue(ContactsContract.Data.MIMETYPE,
+                                                    ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                                            .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phoneNumber.getPhoneNumber())
+                                            .withValue(ContactsContract.CommonDataKinds.Phone.TYPE,
+                                                    ContactsContract.CommonDataKinds.Phone.TYPE_OTHER)
+                                            .build());
+                                }
+                            }
+
+                            //------------------------------------------------------ IS STARRED (FAVORED)
+                            // KHÔNG THÊM VÀO BỞI VÌ NẾU CÓ CÁC DANH BẠ TRÙNG TÊN HIỂN THỊ, TRÙNG SỐ ĐIỆN THOẠI THÌ ĐỀU BỊ SET LÀ STARRED
+                            // ---> KHÔNG ĐÚNG
+
+                            // Asking the Contact provider to create a new contact
+                            try {
+                                getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
+                                Log.i("ADD TO SYSTEM CONTACT", "SUCCESS");
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                Toast.makeText(getApplicationContext(), "Exception: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                        dataChangedDone = true;
                     }
                 }
 
@@ -290,14 +537,223 @@ public class SettingActivity extends AppCompatActivity {
                 }
             });
 
+            while (true) {
+                if (dataChangedDone) {
+                    dataChangedDone = false;
+                    break;
+                }
+            }
             return null;
         }
 
+
         @Override // GUI task here
         protected void onPostExecute(String s) {
-
+            if (dialog.isShowing()) {
+                dialog.dismiss();
+            }
+            Toast.makeText(getApplicationContext(), "Download successfully!", Toast.LENGTH_LONG).show();
         }
     }
+
+    private Bitmap bitmap;
+    private boolean fetchImageDone;
+
+//    class AddNewContactsToDeviceTask extends AsyncTask<String, String, String> {
+//        private ContactAdapter contactAdapter;
+//        private ProgressDialog dialog;
+//
+//        public AddNewContactsToDeviceTask() {
+//            dialog = new ProgressDialog(SettingActivity.this);
+//        }
+//
+//        @Override
+//        protected void onPreExecute() {
+//            dialog.setMessage("Download your contacts from the could, please wait...");
+//            dialog.setCancelable(false);
+//            dialog.show();
+//        }
+//
+//        @Override
+//        protected String doInBackground(String... strings) { // Only non-GUI task
+//            if (!contactList.isEmpty()) {
+//                for (Contact contact : contactList) {
+//                    ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+//
+//                    ops.add(ContentProviderOperation.newInsert(
+//                            ContactsContract.RawContacts.CONTENT_URI)
+//                            .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, null)
+//                            .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, null)
+//                            .build());
+//
+//                    //------------------------------------------------------ NAME
+//                    if (!contact.getName().isEmpty()) {
+//                        ops.add(ContentProviderOperation.newInsert(
+//                                ContactsContract.Data.CONTENT_URI)
+//                                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+//                                .withValue(ContactsContract.Data.MIMETYPE,
+//                                        ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+//                                .withValue(
+//                                        ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME,
+//                                        contact.getName()).build());
+//                    }
+//
+//                    //------------------------------------------------------ AVATAR
+//                    if (!contact.getAvatar_url().isEmpty()) {
+//                        // START: Get bit map from image URL
+//                        new FetchImageFromServerTask(contact).execute();
+//
+//                        while (true) {
+//                            if (fetchImageDone) {
+//                                break;
+//                            }
+//                        }
+//
+//                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+//                        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream);
+//                        byte[] bitmapByteArray = stream.toByteArray();
+//                        // END
+//
+//                        ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+//                                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+//                                .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE)
+//                                .withValue(ContactsContract.CommonDataKinds.Photo.PHOTO, bitmapByteArray)
+//                                .build());
+//                        fetchImageDone = false;
+//                    }
+//
+//                    for (PhoneNumber phoneNumber : contact.getPhoneNumbers()) {
+//
+//                        //------------------------------------------------------ MOBILE NUMBER
+//                        if (phoneNumber.getPhoneType().equals(ContactsContract.CommonDataKinds.
+//                                Phone.TYPE_MOBILE + "")) {
+//                            ops.add(ContentProviderOperation.
+//                                    newInsert(ContactsContract.Data.CONTENT_URI)
+//                                    .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+//                                    .withValue(ContactsContract.Data.MIMETYPE,
+//                                            ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+//                                    .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phoneNumber.getPhoneNumber())
+//                                    .withValue(ContactsContract.CommonDataKinds.Phone.TYPE,
+//                                            ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE)
+//                                    .build());
+//                        }
+//
+//                        //------------------------------------------------------ HOME NUMBER
+//                        if (phoneNumber.getPhoneType().equals(ContactsContract.CommonDataKinds.
+//                                Phone.TYPE_HOME + "")) {
+//                            ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+//                                    .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+//                                    .withValue(ContactsContract.Data.MIMETYPE,
+//                                            ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+//                                    .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phoneNumber.getPhoneNumber())
+//                                    .withValue(ContactsContract.CommonDataKinds.Phone.TYPE,
+//                                            ContactsContract.CommonDataKinds.Phone.TYPE_HOME)
+//                                    .build());
+//                        }
+//
+//                        //------------------------------------------------------ WORK NUMBER
+//                        if (phoneNumber.getPhoneType().equals(ContactsContract.CommonDataKinds.
+//                                Phone.TYPE_WORK + "")) {
+//                            ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+//                                    .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+//                                    .withValue(ContactsContract.Data.MIMETYPE,
+//                                            ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+//                                    .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phoneNumber.getPhoneNumber())
+//                                    .withValue(ContactsContract.CommonDataKinds.Phone.TYPE,
+//                                            ContactsContract.CommonDataKinds.Phone.TYPE_WORK)
+//                                    .build());
+//                        }
+//
+//                        //------------------------------------------------------ MAIN NUMBER
+//                        if (phoneNumber.getPhoneType().equals(ContactsContract.CommonDataKinds.
+//                                Phone.TYPE_MAIN + "")) {
+//                            ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+//                                    .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+//                                    .withValue(ContactsContract.Data.MIMETYPE,
+//                                            ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+//                                    .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phoneNumber.getPhoneNumber())
+//                                    .withValue(ContactsContract.CommonDataKinds.Phone.TYPE,
+//                                            ContactsContract.CommonDataKinds.Phone.TYPE_MAIN)
+//                                    .build());
+//                        }
+//
+//                        //------------------------------------------------------ WORK FAX
+//                        if (phoneNumber.getPhoneType().equals(ContactsContract.CommonDataKinds.
+//                                Phone.TYPE_FAX_WORK + "")) {
+//                            ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+//                                    .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+//                                    .withValue(ContactsContract.Data.MIMETYPE,
+//                                            ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+//                                    .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phoneNumber.getPhoneNumber())
+//                                    .withValue(ContactsContract.CommonDataKinds.Phone.TYPE,
+//                                            ContactsContract.CommonDataKinds.Phone.TYPE_FAX_WORK)
+//                                    .build());
+//                        }
+//
+//                        //------------------------------------------------------ HOME FAX
+//                        if (phoneNumber.getPhoneType().equals(ContactsContract.CommonDataKinds.
+//                                Phone.TYPE_FAX_HOME + "")) {
+//                            ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+//                                    .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+//                                    .withValue(ContactsContract.Data.MIMETYPE,
+//                                            ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+//                                    .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phoneNumber.getPhoneNumber())
+//                                    .withValue(ContactsContract.CommonDataKinds.Phone.TYPE,
+//                                            ContactsContract.CommonDataKinds.Phone.TYPE_FAX_HOME)
+//                                    .build());
+//                        }
+//
+//                        //------------------------------------------------------ PAGER
+//                        if (phoneNumber.getPhoneType().equals(ContactsContract.CommonDataKinds.
+//                                Phone.TYPE_PAGER + "")) {
+//                            ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+//                                    .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+//                                    .withValue(ContactsContract.Data.MIMETYPE,
+//                                            ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+//                                    .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phoneNumber.getPhoneNumber())
+//                                    .withValue(ContactsContract.CommonDataKinds.Phone.TYPE,
+//                                            ContactsContract.CommonDataKinds.Phone.TYPE_PAGER)
+//                                    .build());
+//                        }
+//
+//                        //------------------------------------------------------ OTHER
+//                        if (phoneNumber.getPhoneType().equals(ContactsContract.CommonDataKinds.
+//                                Phone.TYPE_OTHER + "")) {
+//                            ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+//                                    .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+//                                    .withValue(ContactsContract.Data.MIMETYPE,
+//                                            ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+//                                    .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phoneNumber.getPhoneNumber())
+//                                    .withValue(ContactsContract.CommonDataKinds.Phone.TYPE,
+//                                            ContactsContract.CommonDataKinds.Phone.TYPE_OTHER)
+//                                    .build());
+//                        }
+//                    }
+//
+//                    //------------------------------------------------------ IS STARRED (FAVORED)
+//                    // KHÔNG THÊM VÀO BỞI VÌ NẾU CÓ CÁC DANH BẠ TRÙNG TÊN HIỂN THỊ, TRÙNG SỐ ĐIỆN THOẠI THÌ ĐỀU BỊ SET LÀ STARRED
+//                    // ---> KHÔNG ĐÚNG
+//
+//                    // Asking the Contact provider to create a new contact
+//                    try {
+//                        getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                        Toast.makeText(getApplicationContext(), "Exception: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+//                    }
+//                }
+//            }
+//            return null;
+//        }
+//
+//        @Override // GUI task here
+//        protected void onPostExecute(String s) {
+//            if (dialog.isShowing()) {
+//                dialog.dismiss();
+//            }
+//            Toast.makeText(getApplicationContext(), "Download and add to system's contact successfully!", Toast.LENGTH_LONG).show();
+//        }
+//    }
 
 
     public void addThemeListToSpinner(ArrayList<Integer> list) {

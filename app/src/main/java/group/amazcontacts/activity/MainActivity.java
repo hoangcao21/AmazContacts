@@ -1,6 +1,8 @@
 package group.amazcontacts.activity;
 
 import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -59,11 +61,11 @@ public class MainActivity extends AppCompatActivity {
     private static Toolbar toolbar;
     private SearchView searchView;
     private ContactsFragment contactsFragment;
-    private final int REQUEST_PERMISSION_CODE = 100;
-    private boolean isReadContactsPermissionGranted;
-    private boolean isCallPhonePermissionGranted;
-    private boolean isWriteContactsPermissionGranted;
-    private int tabPosition; // Used when permission granted (cấp quyền thành công) at ContactsFragment
+    private final static int REQUEST_PERMISSION_CODE = 100;
+    private static boolean isReadContactsPermissionGranted;
+    private static boolean isCallPhonePermissionGranted;
+    private static boolean isWriteContactsPermissionGranted;
+    private static int tabPosition; // Used when permission granted (cấp quyền thành công) at ContactsFragment
 
     public static Toolbar getToolbar() {
         return toolbar;
@@ -78,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences pref = getApplicationContext().getSharedPreferences("AmazContacts", MODE_PRIVATE); // 0 - for private mode
         SharedPreferences.Editor editor = pref.edit();
 
-        requestPermissions(0); // Request all permission when creating GUI
+        requestPermissions(0, getApplicationContext(), MainActivity.this); // Request all permission when creating GUI
 
         setupViews();
 
@@ -113,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
                     searchView.setVisibility(View.VISIBLE);
 
                     if (!isReadContactsPermissionGranted || !isCallPhonePermissionGranted || !isWriteContactsPermissionGranted) {
-                        requestPermissions(tab.getPosition());
+                        requestPermissions(tab.getPosition(), getApplicationContext(), MainActivity.this);
                     }
 
                     tabPosition = tab.getPosition();
@@ -138,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
 
                     if (tabPosition == 0 && (!isCallPhonePermissionGranted || !isReadContactsPermissionGranted || !isWriteContactsPermissionGranted)) {
                         DialFragment.setPhoneNumber("");
-                        requestPermissions(tab.getPosition());
+                        requestPermissions(tab.getPosition(), getApplicationContext(), MainActivity.this);
                         // Dấu search view khi vào tab Dial Fragment
                         searchMenuItem.setVisible(false);
                         searchView.setVisibility(View.GONE);
@@ -250,14 +252,14 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public List<String> isPermissionsGranted(int position) {
-        SharedPreferences pref = getApplicationContext().getSharedPreferences("AmazContacts", MODE_PRIVATE); // 0 - for private mode
+    public static List<String> isPermissionsGranted(int position, Context context) {
+        SharedPreferences pref = context.getSharedPreferences("AmazContacts", MODE_PRIVATE); // 0 - for private mode
         SharedPreferences.Editor editor = pref.edit();
-        int READ_CONTACTS_PERMISSION = ContextCompat.checkSelfPermission(this,
+        int READ_CONTACTS_PERMISSION = ContextCompat.checkSelfPermission(context,
                 Manifest.permission.READ_CONTACTS);
-        int WRITE_CONTACTS_PERMISSION = ContextCompat.checkSelfPermission(this,
+        int WRITE_CONTACTS_PERMISSION = ContextCompat.checkSelfPermission(context,
                 Manifest.permission.WRITE_CONTACTS);
-        int CALL_PHONE_PERMISSION = ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE);
+        int CALL_PHONE_PERMISSION = ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE);
 
 
         List<String> listPermissionsNeeded = new ArrayList<>();
@@ -298,13 +300,13 @@ public class MainActivity extends AppCompatActivity {
         return listPermissionsNeeded;
     }
 
-    public void requestPermissions(int position) {
+    public static void requestPermissions(int position, Context context, Activity activity) {
         if (!isCallPhonePermissionGranted || !isReadContactsPermissionGranted || !isWriteContactsPermissionGranted) {
 
-            List<String> permissionNeeded = isPermissionsGranted(position);
+            List<String> permissionNeeded = isPermissionsGranted(position, context);
 
             if (!permissionNeeded.isEmpty()) {
-                ActivityCompat.requestPermissions(this, permissionNeeded.toArray(new String[permissionNeeded.size()]), REQUEST_PERMISSION_CODE);
+                ActivityCompat.requestPermissions(activity, permissionNeeded.toArray(new String[permissionNeeded.size()]), REQUEST_PERMISSION_CODE);
             }
         }
 

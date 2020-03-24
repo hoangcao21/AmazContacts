@@ -188,12 +188,12 @@ public class DialFragment extends Fragment {
 
     private void dialNumberClick(View view) {
         TextView textView = (TextView) view;
-        if (phoneNumber.length() < 10) {
+        if (phoneNumber.length() < 11) {
             phoneNumber = phoneNumber + textView.getText().toString();
             txtPhoneNumber.setText(phoneNumber);
             new DialUpdateUI(getActivity()).execute();
         } else {
-            Toast.makeText(getContext(), "Sorry, the phone number can not exceed 10 numbers!", Toast.LENGTH_LONG).show();
+            Toast.makeText(getContext(), "Sorry, the phone number can not exceed 11 numbers!", Toast.LENGTH_LONG).show();
         }
     }
 

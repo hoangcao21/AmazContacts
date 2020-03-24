@@ -2,6 +2,7 @@ package group.amazcontacts.fragment;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
@@ -254,15 +255,25 @@ public class ContactsFragment extends Fragment {
         private ContactAdapter contactAdapter;
         private Activity activity;
         private String searchKey;
+        private ProgressDialog dialog;
 
         public ContactsUpdateUI(Activity activity) {
             this.activity = activity;
             this.searchKey = "";
+            dialog = new ProgressDialog(activity);
         }
 
         public ContactsUpdateUI(Activity activity, String searchKey) {
             this.activity = activity;
             this.searchKey = searchKey;
+            dialog = new ProgressDialog(activity);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            dialog.setMessage("Loading your contacts, please wait...");
+            dialog.setCancelable(false);
+            dialog.show();
         }
 
         @Override
@@ -274,6 +285,9 @@ public class ContactsFragment extends Fragment {
 
         @Override // GUI task here
         protected void onPostExecute(String s) {
+            if (dialog.isShowing()) {
+                dialog.dismiss();
+            }
             contactListView.setAdapter(contactAdapter);
         }
     }
