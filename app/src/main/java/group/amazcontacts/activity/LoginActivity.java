@@ -61,6 +61,8 @@ public class LoginActivity extends AppCompatActivity {
                         FirebaseUser user = firebaseAuth.getCurrentUser();
                         Toast.makeText(getApplicationContext(), "Login successfully",Toast.LENGTH_LONG).show();
                         prepareUIforLoginResult();
+                        Intent i = new Intent(LoginActivity.this , MainActivity.class);
+                        startActivity(i);
                     }
                 }).addOnFailureListener(LoginActivity.this, new OnFailureListener() {
                     @Override

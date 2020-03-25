@@ -99,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         ContactsFragment contactsFragment = new ContactsFragment();
+        contactsFragment.setParentActivty(MainActivity.this);
         FavoritesFragment favoritesFragment = new FavoritesFragment();
         DialFragment dialFragment = new DialFragment();
         ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), 0);

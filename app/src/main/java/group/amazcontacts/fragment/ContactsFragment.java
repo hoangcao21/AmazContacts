@@ -33,6 +33,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import java.io.ByteArrayOutputStream;
@@ -57,13 +58,21 @@ public class ContactsFragment extends Fragment {
     private static List<Contact> contactList;
     private static ListView contactListView;
     private static View thisView;
-
+    private AppCompatActivity parentActivty;
     public ContactsFragment() {
         // Required empty public constructor
     }
 
     public static ListView getListView() {
         return contactListView;
+    }
+
+    public AppCompatActivity getParentActivty() {
+        return parentActivty;
+    }
+
+    public void setParentActivty(AppCompatActivity parentActivty) {
+        this.parentActivty = parentActivty;
     }
 
     public static ContactsFragment newInstance(String param1, String param2) {
@@ -159,7 +168,7 @@ public class ContactsFragment extends Fragment {
         contactListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent i = new Intent(parent.getContext(), ContactDetailActivity.class);
+                Intent i = new Intent(getParentActivty() , ContactDetailActivity.class);
                 // data
                 i.putExtra("contact",contactList.get(position));
                 // avatar
