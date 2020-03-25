@@ -6,4 +6,6 @@
     <color name="transparent">#80000000</color>
     <color name="bananaYellow">#F9E22C</color>
     <color name="replyOrange">#F9AA33</color>
+    <color name="shrinePink">#FEDBD0</color>
+    <color name="basilGreen">#37966F</color>
 </resources>

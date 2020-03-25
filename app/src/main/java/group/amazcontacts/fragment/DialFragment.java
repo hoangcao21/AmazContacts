@@ -36,6 +36,7 @@ import java.util.Objects;
 
 import group.amazcontacts.R;
 import group.amazcontacts.adapter.ContactAdapter;
+import group.amazcontacts.model.AmazTheme;
 import group.amazcontacts.model.Contact;
 import group.amazcontacts.model.PhoneNumber;
 
@@ -50,6 +51,7 @@ public class DialFragment extends Fragment {
     private static ListView dialListView;
     private Button btnCall;
     private Button btnDelete;
+    private SharedPreferences pref;
     private static String phoneNumber = "";
     private static TextView txtPhoneNumber;
     private static Context contextX;
@@ -106,6 +108,7 @@ public class DialFragment extends Fragment {
         layout = view.findViewById(R.id.dialLayout);
         activity = getActivity();
 
+
         isPermissionsGranted();
 
         txt_1 = view.findViewById(R.id.txt_1);
@@ -122,6 +125,13 @@ public class DialFragment extends Fragment {
         txt_Tag = view.findViewById(R.id.txt_Tag);
         setEvents();
         contextX = getContext();
+        initializeTheme();
+    }
+
+    private void initializeTheme() {
+        pref = activity.getSharedPreferences("theme", Context.MODE_PRIVATE);
+        int colorFromPref = pref.getInt("themeColor", AmazTheme.BLUE_ACCENT);
+        changeDialColor(colorFromPref);
     }
 
     public static boolean isPermissionsGranted() {

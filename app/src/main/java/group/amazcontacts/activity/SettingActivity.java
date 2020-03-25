@@ -1,8 +1,10 @@
 package group.amazcontacts.activity;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.ContentProviderOperation;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -30,6 +32,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
@@ -70,7 +73,10 @@ public class SettingActivity extends AppCompatActivity {
     private TextView textViewEmail;
     private Button btnSignOut;
     private Spinner spinnerTheme;
+    private ActionBar bar;
+    private ArrayList<AmazTheme> themeList;
     public static int THEME_COLOR = 0;
+    private SharedPreferences pref;
 
 
     // Download & Import section
@@ -98,11 +104,11 @@ public class SettingActivity extends AppCompatActivity {
 
     private void mappingViews() {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        ActionBar bar = getSupportActionBar();
-        int color = ContextCompat.getColor(getApplicationContext(), R.color.blueAccent);
-
-        bar.setBackgroundDrawable(new ColorDrawable(color));
-        bar.setTitle(Html.fromHtml("<font color=\"black\">" + getString(R.string.app_name) + "</font>"));
+        //add themes to spinner
+        spinnerTheme = findViewById(R.id.spinnerTheme);
+        themeList = generateThemes();
+        addThemeListToSpinner(themeList);
+        initializeTheme();
 
         Window window = getWindow();
 
@@ -110,9 +116,8 @@ public class SettingActivity extends AppCompatActivity {
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.setStatusBarColor(ContextCompat.getColor(getApplicationContext(), R.color.transparent));
 
-        //add themes to spinner
-        spinnerTheme = findViewById(R.id.spinnerTheme);
-        addThemeListToSpinner(generateThemes());
+
+
 
         profileAvatar = findViewById(R.id.imgProfileAvatar);
         textViewName = findViewById(R.id.textViewName);
@@ -136,10 +141,33 @@ public class SettingActivity extends AppCompatActivity {
         imageView = new ImageView(getApplicationContext());
     }
 
+    private void initializeTheme() {
+        bar = getSupportActionBar();
+        pref = getSharedPreferences("theme", Context.MODE_PRIVATE);
+        int colorFromPref = pref.getInt("themeColor", AmazTheme.BLUE_ACCENT);
+        int colorDrawable = ContextCompat.getColor(getApplicationContext(), colorFromPref);
+
+        bar.setBackgroundDrawable(new ColorDrawable(colorDrawable));
+        bar.setTitle(Html.fromHtml("<font color=\"black\">" + getString(R.string.app_name) + "</font>"));
+
+        int selectedIndex = 0;
+        for (int i = 0; i < themeList.size(); i++) {
+            AmazTheme theme = themeList.get(i);
+            int c = theme.getColor();
+            if (c == colorFromPref) {
+                selectedIndex = i;
+                break;
+            }
+        }
+        spinnerTheme.setSelection(selectedIndex);
+    }
+
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            setResult(MainActivity.RESULT_CODE_FROM_SETTINGS);
+            Intent intent = new Intent();
+            if (THEME_COLOR != 0) intent.putExtra("color", THEME_COLOR);
+            setResult(MainActivity.RESULT_CODE_FROM_SETTINGS, intent);
             finish();
         }
         return true;
@@ -191,6 +219,11 @@ public class SettingActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 AmazTheme selected = (AmazTheme) spinnerTheme.getItemAtPosition(position);
                 SettingActivity.changeTheme(selected);
+                changeToolbarColor(selected);
+                pref = getSharedPreferences("theme", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = pref.edit();
+                editor.putInt("themeColor", selected.getColor());
+                editor.commit();
             }
 
             @Override
@@ -228,6 +261,7 @@ public class SettingActivity extends AppCompatActivity {
             dialog.show();
         }
 
+        @SuppressLint("WrongThread")
         @Override
         protected String doInBackground(String... strings) { // Only non-GUI task
             contactList = ContactsFragment.getContacts(Objects.requireNonNull(getApplicationContext()), searchKey);
@@ -581,15 +615,7 @@ public class SettingActivity extends AppCompatActivity {
     }
 
     public ArrayList<AmazTheme> generateThemes() {
-        ArrayList<AmazTheme> listThemes = new ArrayList<>();
-        AmazTheme s1 = new AmazTheme("Blue Accent", AmazTheme.BLUE_ACCENT);
-        AmazTheme s2 = new AmazTheme("Banana Yellow", AmazTheme.BANANA_YELLOW);
-        AmazTheme s3 = new AmazTheme("Reply Orange", AmazTheme.REPLY_ORANGE);
-        listThemes.add(s1);
-        listThemes.add(s2);
-        listThemes.add(s3);
-//        listThemes.add(s4);
-        return listThemes;
+        return AmazTheme.autoGenerateThemeList();
     }
 
     public static void changeTheme(AmazTheme amazTheme) {
@@ -609,5 +635,14 @@ public class SettingActivity extends AppCompatActivity {
         setResult(MainActivity.RESULT_CODE_FROM_SETTINGS, intent);
         finish();
         super.onBackPressed();
+    }
+
+    public void changeToolbarColor(AmazTheme theme){
+        changeToolbarColor(theme.getColor());
+    }
+
+    public void changeToolbarColor(int color){
+        int colorToSet = ContextCompat.getColor(getApplicationContext(), color);
+        bar.setBackgroundDrawable(new ColorDrawable(colorToSet));
     }
 }

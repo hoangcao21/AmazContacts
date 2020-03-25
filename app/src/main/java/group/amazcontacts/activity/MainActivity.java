@@ -64,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
     private static Toolbar toolbar;
     private SearchView searchView;
     private ContactsFragment contactsFragment;
+    private SharedPreferences pref;
     private final static int REQUEST_PERMISSION_CODE = 100;
     private static boolean isReadContactsPermissionGranted;
     private static boolean isCallPhonePermissionGranted;
@@ -184,13 +185,17 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         Objects.requireNonNull(this.getSupportActionBar()).setDisplayHomeAsUpEnabled(false);
-        toolbar.setBackgroundColor(getResources().getColor(R.color.blueAccent));
+        initializeTheme();
+    }
 
+    private void initializeTheme() {
+        pref = getSharedPreferences("theme", Context.MODE_PRIVATE);
+        int colorFromPref = pref.getInt("themeColor", AmazTheme.BLUE_ACCENT);
+        changeToolbarColor(colorFromPref);
     }
 
     public void changeToolbarColor(int color){
         toolbar.setBackgroundColor(getResources().getColor(color));
-        Log.i("test", "change color success");
     }
 
     private Menu mainMenu;
