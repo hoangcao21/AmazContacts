@@ -5,10 +5,15 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import android.content.ContentProviderOperation;
+import android.content.ContentProviderResult;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.RemoteException;
+import android.provider.ContactsContract;
 import android.text.Html;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,6 +25,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
+import group.amazcontacts.activity.MainActivity;
 import group.amazcontacts.model.AmazTheme;
 import group.amazcontacts.model.PhoneNumber;
 
@@ -54,7 +60,12 @@ public class AddNewContactActivity extends AppCompatActivity {
                 String type = spinnerType.getSelectedItem().toString();
                 int typeInt = PhoneNumber.getPhoneTypeInt(type);
                 if (name.isEmpty() || phone.isEmpty()) Toast.makeText(this, "You have to fill in all the fields!", Toast.LENGTH_LONG).show();
-                else Toast.makeText(this, name + ": " + phone + " (" + type + ", " + typeInt + ")", Toast.LENGTH_LONG).show();
+                else {
+                    addContact(name, phone, type);
+                    Intent intent = new Intent();
+                    setResult(MainActivity.RESULT_CODE_FROM_ADD_NEW, intent);
+                    finish();
+                }
                 break;
             case android.R.id.home:
                 finish();
@@ -94,5 +105,35 @@ public class AddNewContactActivity extends AppCompatActivity {
         int colorDrawable = ContextCompat.getColor(getApplicationContext(), colorFromPref);
         mActionBar.setBackgroundDrawable(new ColorDrawable(colorDrawable));
         mActionBar.setTitle(Html.fromHtml("<font color=\"black\">" + getString(R.string.app_name) + "</font>"));
+    }
+
+    private void addContact(String name, String phone, String type) {
+        ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+        int rawContactInsertIndex = ops.size();
+        int rawContactPhoneType = PhoneNumber.getPhoneTypeInt(type);
+
+        ops.add(ContentProviderOperation.newInsert(ContactsContract.RawContacts.CONTENT_URI)
+                .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, null)
+                .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, null).build());
+        ops.add(ContentProviderOperation
+                .newInsert(ContactsContract.Data.CONTENT_URI)
+                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactInsertIndex)
+                .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+                .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, name) // Name of the person
+                .build());
+        ops.add(ContentProviderOperation
+                .newInsert(ContactsContract.Data.CONTENT_URI)
+                .withValueBackReference(
+                        ContactsContract.Data.RAW_CONTACT_ID, rawContactInsertIndex)
+                .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phone) // Number of the person
+                .withValue(ContactsContract.CommonDataKinds.Phone.TYPE, rawContactPhoneType).build()); // Type of phone number
+        try
+        {
+            ContentProviderResult[] res = getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
+        }
+        catch (Exception e) {
+            Toast.makeText(this, "Some error occurred!", Toast.LENGTH_SHORT).show();
+        }
     }
 }
