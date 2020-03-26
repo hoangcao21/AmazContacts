@@ -218,13 +218,28 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextSubmit(String query) {
-                return false;
+                new ContactsUpdateUI(query).execute("");
+                return true;
+//                return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                new ContactsUpdateUI(newText).execute("");
-                return true;
+                return false;
+//                new ContactsUpdateUI(newText).execute("");
+//                return true;
+            }
+        });
+        searchView.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus)
+                {
+                    //Collapse the action item.
+                    toolbar.collapseActionView();
+                    //Clear the filter/search query.
+                    new ContactsUpdateUI().execute("");
+                }
             }
         });
 
