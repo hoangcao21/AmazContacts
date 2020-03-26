@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import group.amazcontacts.AddNewContactActivity;
 import group.amazcontacts.R;
 import group.amazcontacts.adapter.ViewPagerAdapter;
 import group.amazcontacts.fragment.ContactsFragment;
@@ -73,6 +74,9 @@ public class MainActivity extends AppCompatActivity {
 
     public static int REQUEST_CODE_TO_SETTINGS = 200;
     public static int RESULT_CODE_FROM_SETTINGS = 201;
+
+    public static int REQUEST_CODE_TO_ADD_NEW = 300;
+    public static int RESULT_CODE_FROM_ADD_NEW = 301;
 
     public static Toolbar getToolbar() {
         return toolbar;
@@ -249,6 +253,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.action_add:
+                Intent intentToAddNew = new Intent(getApplicationContext(), AddNewContactActivity.class);
+                startActivityForResult(intentToAddNew, REQUEST_CODE_TO_ADD_NEW);
+                break;
             case R.id.action_setting:
                 Intent intent = new Intent(getApplicationContext(), SettingActivity.class);
                 startActivityForResult(intent, REQUEST_CODE_TO_SETTINGS);
