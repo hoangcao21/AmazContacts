@@ -13,11 +13,15 @@ import android.text.Html;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+
 import group.amazcontacts.model.AmazTheme;
+import group.amazcontacts.model.PhoneNumber;
 
 public class AddNewContactActivity extends AppCompatActivity {
     private ActionBar mActionBar;
@@ -47,8 +51,10 @@ public class AddNewContactActivity extends AppCompatActivity {
             case R.id.action_save:
                 String name = editTextName.getText().toString();
                 String phone = editTextPhone.getText().toString();
-                if (name.isEmpty() && phone.isEmpty()) Toast.makeText(this, "All blank, no contact created", Toast.LENGTH_LONG).show();
-                else Toast.makeText(this, "Contact has been created successfully", Toast.LENGTH_LONG).show();
+                String type = spinnerType.getSelectedItem().toString();
+                int typeInt = PhoneNumber.getPhoneTypeInt(type);
+                if (name.isEmpty() || phone.isEmpty()) Toast.makeText(this, "You have to fill in all the fields!", Toast.LENGTH_LONG).show();
+                else Toast.makeText(this, name + ": " + phone + " (" + type + ", " + typeInt + ")", Toast.LENGTH_LONG).show();
                 break;
             case android.R.id.home:
                 finish();
@@ -59,10 +65,20 @@ public class AddNewContactActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    public void addTypeListToSpinner(ArrayList<String> list) {
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.support_simple_spinner_dropdown_item, list);
+        spinnerType.setAdapter(adapter);
+    }
+
+    public ArrayList<String> generateTypes() {
+        return PhoneNumber.autoGenerateTypeStringList();
+    }
+
     private void setUpView() {
         mActionBar.setDisplayHomeAsUpEnabled(true);
         mActionBar.setDisplayShowHomeEnabled(true);
         initializeTheme();
+        addTypeListToSpinner(generateTypes());
     }
 
     private void mapping(){
