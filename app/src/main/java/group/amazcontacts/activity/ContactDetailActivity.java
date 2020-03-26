@@ -13,10 +13,13 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.Html;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import group.amazcontacts.R;
 import group.amazcontacts.adapter.ContactDetailAdapter;
@@ -30,6 +33,7 @@ public class ContactDetailActivity extends AppCompatActivity {
     private ListView phoneListView;
     private ActionBar mActionBar;
     private SharedPreferences pref;
+    private Contact c = new Contact();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,7 +51,7 @@ public class ContactDetailActivity extends AppCompatActivity {
             return;
         }
         // get contact
-        Contact c = (Contact) i.getSerializableExtra("contact");
+        c = (Contact) i.getSerializableExtra("contact");
         // get avatar
         Bitmap bmp;
         byte[] byteArray = getIntent().getByteArrayExtra("avatar");
@@ -67,9 +71,32 @@ public class ContactDetailActivity extends AppCompatActivity {
             case android.R.id.home:
                 finish();
                 break;
+            case R.id.change_favorite:
+                handleMarkFavorite(item);
         }
         return true;
     }
+    private void handleMarkFavorite(MenuItem item){
+        item.setChecked(!item.isChecked());
+        if(item.isChecked()){
+
+        }else{
+
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.contact_detail_menu, menu);
+        if (c.isFavored()){
+            menu.getItem(0).setTitle("Remove from favorite");
+        }else{
+            menu.getItem(0).setTitle("Add to favorite");
+        }
+        return true;
+    }
+
 
     private void mapping(){
         avatar = findViewById(R.id.contact_avatar);

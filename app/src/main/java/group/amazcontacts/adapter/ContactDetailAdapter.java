@@ -1,10 +1,17 @@
 package group.amazcontacts.adapter;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.TextView;
+
+import androidx.core.app.ActivityCompat;
 
 import java.util.List;
 
@@ -40,12 +47,22 @@ public class ContactDetailAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         View v = View.inflate(parentContext.getApplicationContext(), R.layout.contact_detail_item, null);
         TextView phoneType = v.findViewById(R.id.phone_number_type);
-        TextView phoneNumber = v.findViewById(R.id.phone_number);
+        final TextView phoneNumber = v.findViewById(R.id.phone_number);
 
         PhoneNumber pn = phoneNumbers.get(position);
         phoneNumber.setText(pn.getPhoneNumber());
         phoneType.setText(pn.getPhoneType());
-
+        Button btn = v.findViewById(R.id.buttonCall);
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + phoneNumber.getText()));
+                if (ActivityCompat.checkSelfPermission(parentContext, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                    return;
+                }
+                parentContext.startActivity(intent);
+            }
+        });
         return v;
     }
 }
