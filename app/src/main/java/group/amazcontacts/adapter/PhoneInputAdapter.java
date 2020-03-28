@@ -46,7 +46,7 @@ public class PhoneInputAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
         View view = convertView;
         Spinner spinnerPhoneType = null;
         EditText editTextPhoneNumber = null;
@@ -55,16 +55,20 @@ public class PhoneInputAdapter extends BaseAdapter {
         if (view == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             view = inflater.inflate(R.layout.phone_input_layout, null);
-            Log.i("test", "view is inflated");
         }
         spinnerPhoneType = view.findViewById(R.id.spinnerPhoneType);
         editTextPhoneNumber = view.findViewById(R.id.editTextPhoneNumber);
         buttonRemovePhoneNumber = view.findViewById(R.id.buttonRemovePhoneNumber);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, spinnerItems);
         spinnerPhoneType.setAdapter(adapter);
-        Log.i("test", view.getContext().toString());
-        Log.i("test", spinnerItems.get(0));
-        spinnerPhoneType.setAdapter(adapter);
+
+        buttonRemovePhoneNumber.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                list.remove(position);
+                notifyDataSetChanged();
+            }
+        });
 
         final PhoneNumber phoneNumber = list.get(position);
         editTextPhoneNumber.setText(phoneNumber.getPhoneNumber());
