@@ -14,6 +14,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -23,8 +24,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import group.amazcontacts.activity.MainActivity;
+import group.amazcontacts.adapter.PhoneInputAdapter;
 import group.amazcontacts.model.AmazTheme;
 import group.amazcontacts.model.PhoneNumber;
 
@@ -32,6 +35,8 @@ public class AddNewContactActivity extends AppCompatActivity {
     private ActionBar mActionBar;
     private EditText editTextName, editTextPhone;
     private Spinner spinnerType;
+    private ListView listViewPhone;
+    private ArrayList<PhoneNumber> listPhoneNumber;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,7 +100,13 @@ public class AddNewContactActivity extends AppCompatActivity {
         editTextName = findViewById(R.id.editTextName);
         editTextPhone = findViewById(R.id.editTextPhone);
         spinnerType = findViewById(R.id.spinnerType);
+        listViewPhone = findViewById(R.id.listViewPhone);
         mActionBar = getSupportActionBar();
+
+        listPhoneNumber = new ArrayList<>();
+        listPhoneNumber.add(new PhoneNumber("2", "0343241728"));
+        PhoneInputAdapter phoneInputAdapter = new PhoneInputAdapter(listPhoneNumber, generateTypes(), this);
+        listViewPhone.setAdapter(phoneInputAdapter);
     }
 
     private void initializeTheme() {
@@ -107,7 +118,7 @@ public class AddNewContactActivity extends AppCompatActivity {
     }
 
     private void addContact(String name, String phone, String type) {
-        ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+        ArrayList<ContentProviderOperation> ops = new ArrayList<>();
         int rawContactInsertIndex = ops.size();
         int rawContactPhoneType = PhoneNumber.getPhoneTypeInt(type);
 

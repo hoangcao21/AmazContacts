@@ -8,27 +8,28 @@
 
     <EditText
         android:id="@+id/editTextName"
-        android:layout_width="wrap_content"
+        android:layout_width="150dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="165dp"
         android:layout_marginTop="100dp"
-        android:layout_marginEnd="30dp"
         android:ems="10"
         android:hint="@string/input_name"
         android:inputType="textPersonName"
         android:maxLength="32"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView13" />
 
     <EditText
         android:id="@+id/editTextPhone"
-        android:layout_width="wrap_content"
+        android:layout_width="150dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
         android:layout_marginTop="30dp"
         android:ems="10"
         android:hint="@string/input_phone"
         android:inputType="phone"
         android:maxLength="11"
-        app:layout_constraintEnd_toEndOf="@+id/editTextName"
+        app:layout_constraintStart_toEndOf="@+id/spinnerType"
         app:layout_constraintTop_toBottomOf="@+id/editTextName" />
 
     <TextView
@@ -50,5 +51,24 @@
         android:textAlignment="textEnd"
         app:layout_constraintBottom_toBottomOf="@+id/editTextPhone"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/editTextPhone" />
+
+    <ListView
+        android:id="@+id/listViewPhone"
+        android:layout_width="409dp"
+        android:layout_height="200dp"
+        android:layout_marginTop="100dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editTextName" />
+
+    <Button
+        android:id="@+id/buttonAddPhoneNumber"
+        android:layout_width="50dp"
+        android:layout_height="40dp"
+        android:text="+"
+        app:layout_constraintBottom_toBottomOf="@+id/editTextPhone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/editTextPhone"
         app:layout_constraintTop_toTopOf="@+id/editTextPhone" />
 </androidx.constraintlayout.widget.ConstraintLayout>
