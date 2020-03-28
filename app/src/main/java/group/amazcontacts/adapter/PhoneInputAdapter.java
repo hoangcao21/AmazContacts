@@ -1,8 +1,7 @@
 package group.amazcontacts.adapter;
 
-import android.app.Activity;
 import android.content.Context;
-import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,9 +12,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import java.util.ArrayList;
-import java.util.List;
 
-import group.amazcontacts.AddNewContactActivity;
 import group.amazcontacts.R;
 import group.amazcontacts.model.PhoneNumber;
 
@@ -65,6 +62,7 @@ public class PhoneInputAdapter extends BaseAdapter {
         buttonRemovePhoneNumber.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //TODO keep value from editText for other contacts
                 list.remove(position);
                 notifyDataSetChanged();
             }

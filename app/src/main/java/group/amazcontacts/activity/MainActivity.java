@@ -38,7 +38,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import group.amazcontacts.AddNewContactActivity;
 import group.amazcontacts.R;
 import group.amazcontacts.adapter.ViewPagerAdapter;
 import group.amazcontacts.fragment.ContactsFragment;

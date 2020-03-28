@@ -14,8 +14,9 @@
         android:roundIcon="@mipmap/amazcontacts_app_icon"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".AddNewContactActivity"></activity>
-        <activity android:name=".activity.SettingActivity"></activity>
+        <activity android:name=".activity.EditContactActivity"></activity>
+        <activity android:name=".activity.AddNewContactActivity" />
+        <activity android:name=".activity.SettingActivity" />
         <activity android:name=".activity.SignUpActivity" />
         <activity android:name=".activity.LoginActivity" />
         <activity android:name=".activity.ContactDetailActivity" />

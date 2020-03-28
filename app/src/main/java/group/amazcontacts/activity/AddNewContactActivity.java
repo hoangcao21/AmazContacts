@@ -1,4 +1,4 @@
-package group.amazcontacts;
+package group.amazcontacts.activity;
 
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
@@ -10,12 +10,10 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.Html;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -28,9 +26,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
-import java.util.List;
 
-import group.amazcontacts.activity.MainActivity;
+import group.amazcontacts.R;
 import group.amazcontacts.adapter.PhoneInputAdapter;
 import group.amazcontacts.model.AmazTheme;
 import group.amazcontacts.model.PhoneNumber;
@@ -38,8 +35,6 @@ import group.amazcontacts.model.PhoneNumber;
 public class AddNewContactActivity extends AppCompatActivity {
     private ActionBar mActionBar;
     private EditText editTextName;
-    //    private EditText editTextPhone;
-//    private Spinner spinnerType;
     private Button buttonAddPhoneNumber;
     private ListView listViewPhone;
     private ArrayList<PhoneNumber> listPhoneNumber;
@@ -57,8 +52,6 @@ public class AddNewContactActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.add_new_contact_menu, menu);
-
-//        MenuItem itemSave = menu.findItem(R.id.action_save);
         return true;
     }
 
@@ -148,7 +141,6 @@ public class AddNewContactActivity extends AppCompatActivity {
         mActionBar = getSupportActionBar();
 
         listPhoneNumber = new ArrayList<>();
-//        listPhoneNumber.add(new PhoneNumber("2", "0343241728"));
         refreshListView();
     }
 
