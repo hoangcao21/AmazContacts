@@ -70,4 +70,13 @@ public class PhoneNumber implements Serializable {
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
+
+    public String getDetailPhoneType(){
+        try{
+            return getPhoneTypeString(Integer.parseInt(getPhoneType()));
+        }catch (Exception e ){
+            e.printStackTrace();
+            return "Other";
+        }
+    }
 }

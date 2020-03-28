@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:icon="@drawable/baseline_favorite_black_48"
         android:id="@+id/change_favorite"
-        android:checkable="true"
-        android:title="Mark as favorite" />
+        android:title="Change favorite state"
+        app:showAsAction="ifRoom"/>
 </menu>

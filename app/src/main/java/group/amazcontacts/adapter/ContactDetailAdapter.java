@@ -51,7 +51,7 @@ public class ContactDetailAdapter extends BaseAdapter {
 
         PhoneNumber pn = phoneNumbers.get(position);
         phoneNumber.setText(pn.getPhoneNumber());
-        phoneType.setText(pn.getPhoneType());
+        phoneType.setText(pn.getDetailPhoneType());
         Button btn = v.findViewById(R.id.buttonCall);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override

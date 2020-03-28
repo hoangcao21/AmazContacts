@@ -25,6 +25,7 @@ import group.amazcontacts.R;
 import group.amazcontacts.adapter.ContactDetailAdapter;
 import group.amazcontacts.model.AmazTheme;
 import group.amazcontacts.model.Contact;
+import group.amazcontacts.service.ContactDatabaseHandler;
 
 public class ContactDetailActivity extends AppCompatActivity {
 
@@ -34,6 +35,7 @@ public class ContactDetailActivity extends AppCompatActivity {
     private ActionBar mActionBar;
     private SharedPreferences pref;
     private Contact c = new Contact();
+    private MenuItem item;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,6 +62,11 @@ public class ContactDetailActivity extends AppCompatActivity {
 
         name.setText(c.getName());
 
+//        if(c.isFavored()){
+//            item.setIcon(R.drawable.baseline_favorite_24);
+//        }else{
+//            item.setIcon(R.drawable.baseline_favorite_24);
+//        }
         ContactDetailAdapter contactDetailAdapter = new ContactDetailAdapter(c.getPhoneNumbers() , this);
         phoneListView.setAdapter(contactDetailAdapter);
 
@@ -77,11 +84,14 @@ public class ContactDetailActivity extends AppCompatActivity {
         return true;
     }
     private void handleMarkFavorite(MenuItem item){
-        item.setChecked(!item.isChecked());
-        if(item.isChecked()){
-
-        }else{
-
+        try {
+            String contactID = c.getId();
+            ContactDatabaseHandler contactDatabaseHandler = new ContactDatabaseHandler(ContactDetailActivity.this);
+            int newStarred = c.isFavored() ? 0 : 1 ;
+            String result = contactDatabaseHandler.getContactFromID(contactID, newStarred);
+            Toast.makeText(getApplicationContext(), "Result "+result,Toast.LENGTH_LONG).show();
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 
@@ -89,11 +99,6 @@ public class ContactDetailActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.contact_detail_menu, menu);
-        if (c.isFavored()){
-            menu.getItem(0).setTitle("Remove from favorite");
-        }else{
-            menu.getItem(0).setTitle("Add to favorite");
-        }
         return true;
     }
 
@@ -103,6 +108,7 @@ public class ContactDetailActivity extends AppCompatActivity {
         name = findViewById(R.id.contact_name);
         phoneListView = findViewById(R.id.phone_number_listView);
         mActionBar = getSupportActionBar();
+        item = findViewById(R.id.change_favorite);
     }
 
     private void initializeTheme() {
