@@ -1,6 +1,8 @@
 package group.amazcontacts.adapter;
 
 import android.content.Context;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,9 +47,9 @@ public class PhoneInputAdapter extends BaseAdapter {
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         View view = convertView;
-        Spinner spinnerPhoneType = null;
-        EditText editTextPhoneNumber = null;
-        Button buttonRemovePhoneNumber = null;
+        Spinner spinnerPhoneType;
+        final EditText editTextPhoneNumber;
+        Button buttonRemovePhoneNumber;
 
         if (view == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -62,9 +64,25 @@ public class PhoneInputAdapter extends BaseAdapter {
         buttonRemovePhoneNumber.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO keep value from editText for other contacts
                 list.remove(position);
                 notifyDataSetChanged();
+            }
+        });
+
+        editTextPhoneNumber.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                list.get(position).setPhoneNumber(editTextPhoneNumber.getText().toString());
             }
         });
 

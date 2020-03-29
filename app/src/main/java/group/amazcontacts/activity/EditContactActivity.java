@@ -37,6 +37,9 @@ public class EditContactActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_contact);
+        mapping();
+        setUpView();
+        setUpEvents();
     }
 
     @Override
@@ -70,21 +73,21 @@ public class EditContactActivity extends AppCompatActivity {
         mActionBar.setTitle(Html.fromHtml("<font color=\"black\">" + getString(R.string.app_name) + "</font>"));
     }
 
-//    private void setUpEvents() {
-//        buttonAddPhoneNumber.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                if (listPhoneNumber.size() < 5) {
-//                    listPhoneNumber.add(new PhoneNumber("2", ""));
-//                    refreshListView();
-//                } else {
-//                    Toast.makeText(AddNewContactActivity.this, "Each contact can only have 5 numbers!", Toast.LENGTH_SHORT).show();
-//                }
-//
-//
-//            }
-//        });
-//    }
+    private void setUpEvents() {
+        buttonAddPhoneNumberEditContact.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (listPhoneNumber.size() < 5) {
+                    listPhoneNumber.add(new PhoneNumber("2", ""));
+                    refreshListView();
+                } else {
+                    Toast.makeText(EditContactActivity.this, "Each contact can only have 5 numbers!", Toast.LENGTH_SHORT).show();
+                }
+
+
+            }
+        });
+    }
 
     private void mapping() {
         editTextNameEditContact = findViewById(R.id.editTextNameEditContact);
@@ -100,8 +103,8 @@ public class EditContactActivity extends AppCompatActivity {
         return PhoneNumber.autoGenerateTypeStringList();
     }
 
-//    private void refreshListView() {
-//        PhoneInputAdapter phoneInputAdapter = new PhoneInputAdapter(listPhoneNumber, generateTypes(), this);
-//        listViewPhone.setAdapter(phoneInputAdapter);
-//    }
+    private void refreshListView() {
+        PhoneInputAdapter phoneInputAdapter = new PhoneInputAdapter(listPhoneNumber, generateTypes(), this);
+        listViewPhoneEdit.setAdapter(phoneInputAdapter);
+    }
 }
