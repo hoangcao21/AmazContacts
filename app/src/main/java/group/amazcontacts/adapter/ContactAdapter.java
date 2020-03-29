@@ -24,6 +24,22 @@ public class ContactAdapter extends BaseAdapter {
         this.activity = activity;
     }
 
+    public List<Contact> getContactList() {
+        return contactList;
+    }
+
+    public void setContactList(List<Contact> contactList) {
+        this.contactList = contactList;
+    }
+
+    public Activity getActivity() {
+        return activity;
+    }
+
+    public void setActivity(Activity activity) {
+        this.activity = activity;
+    }
+
     @Override
     public int getCount() {
         return contactList.size();

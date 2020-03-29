@@ -19,6 +19,7 @@ import android.provider.ContactsContract;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -323,6 +324,13 @@ public class DialFragment extends Fragment {
         @Override // GUI task here
         protected void onPostExecute(String s) {
             dialListView.setAdapter(contactAdapter);
+            dialListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Contact c = contactAdapter.getContactList().get(position);
+                    txtPhoneNumber.setText(c.getPhoneNumbers().get(0).getPhoneNumber());
+                }
+            });
         }
 
     }
