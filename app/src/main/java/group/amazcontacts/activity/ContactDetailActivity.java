@@ -82,7 +82,7 @@ public class ContactDetailActivity extends AppCompatActivity {
             String contactID = c.getId();
             ContactDatabaseHandler contactDatabaseHandler = new ContactDatabaseHandler(ContactDetailActivity.this);
             int newStarred = c.isFavored() ? 0 : 1 ;
-            String result = contactDatabaseHandler.getContactFromID(contactID, newStarred);
+            String result = contactDatabaseHandler.setContactStarById(contactID, newStarred);
             Toast.makeText(getApplicationContext(), "Result "+result+" "+newStarred,Toast.LENGTH_LONG).show();
         }catch (Exception e){
             e.printStackTrace();
