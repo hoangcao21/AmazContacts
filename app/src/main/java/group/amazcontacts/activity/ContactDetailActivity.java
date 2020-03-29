@@ -61,12 +61,6 @@ public class ContactDetailActivity extends AppCompatActivity {
         avatar.setImageBitmap(bmp);
 
         name.setText(c.getName());
-
-//        if(c.isFavored()){
-//            item.setIcon(R.drawable.baseline_favorite_24);
-//        }else{
-//            item.setIcon(R.drawable.baseline_favorite_24);
-//        }
         ContactDetailAdapter contactDetailAdapter = new ContactDetailAdapter(c.getPhoneNumbers() , this);
         phoneListView.setAdapter(contactDetailAdapter);
 
@@ -89,7 +83,7 @@ public class ContactDetailActivity extends AppCompatActivity {
             ContactDatabaseHandler contactDatabaseHandler = new ContactDatabaseHandler(ContactDetailActivity.this);
             int newStarred = c.isFavored() ? 0 : 1 ;
             String result = contactDatabaseHandler.getContactFromID(contactID, newStarred);
-            Toast.makeText(getApplicationContext(), "Result "+result,Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Result "+result+" "+newStarred,Toast.LENGTH_LONG).show();
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -99,6 +93,14 @@ public class ContactDetailActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.contact_detail_menu, menu);
+        MenuItem item = menu.findItem(R.id.change_favorite);
+
+        if(c.isFavored()){
+            item.setIcon(R.drawable.baseline_favorite_24);
+        }else{
+            item.setIcon(R.drawable.baseline_add_circle_24);
+        }
+
         return true;
     }
 
