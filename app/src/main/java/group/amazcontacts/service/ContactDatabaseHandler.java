@@ -36,7 +36,7 @@ public class ContactDatabaseHandler {
         this.parentActivty = parentActivty;
     }
 
-    public String getContactFromID(String id, int newStarred){
+    public String setContactStarById(String id, int newStarred){
         try {
             ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
 
