@@ -38,21 +38,49 @@ public class ContactDatabaseHandler {
 
     public String setContactStarById(String id, int newStarred){
         try {
-            ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
-
-            ops.add(ContentProviderOperation.newUpdate(ContactsContract.Data.CONTENT_URI)
-                    .withSelection(ContactsContract.CommonDataKinds.Phone._ID + "=? AND " +
-                            ContactsContract.Data.MIMETYPE + "='" +
-                            ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE + "'", new String[] {id})
-                    .withValue(ContactsContract.CommonDataKinds.Phone.STARRED, newStarred)
-                    .build());
-
-            ContentProviderResult[] result =  parentActivty.getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
-            if(result.length >= 0 ){
-                return  "Sucessfully";
-            }else {
-                return  "Failed";
+            ArrayList<ContentProviderOperation> contentProviderOperations = new ArrayList<>();
+            String selection = ContactsContract.CommonDataKinds.Phone.CONTACT_ID +" = ? ";
+            String [] selectionArgs = new String [] {id};
+            contentProviderOperations.add(ContentProviderOperation.newUpdate(ContactsContract.RawContacts.CONTENT_URI)
+                    .withSelection(selection , selectionArgs)
+                    .withValue(ContactsContract.CommonDataKinds.Phone.STARRED, newStarred ).build());
+            ContentProviderResult[] results = parentActivty.getContentResolver().applyBatch(ContactsContract.AUTHORITY, contentProviderOperations);
+            Log.i(TAG, "setContactStarById: result"+results);
+            Log.i(TAG, "setContactStarById: getAllContact"+getAllContact());
+            if (results.length >0){
+                return "Successfully";
+            }else{
+                return "Not Sucessfully";
             }
+
+        } catch (Exception e) {
+            Log.w("UpdateContact", e.getMessage()+"");
+            e.printStackTrace();
+            return "Something Went Wrong";
+        }
+    }
+    public String getAllContact(){
+        try {
+            Uri uri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
+
+            String [] projections = {ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME, ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Phone.STARRED};
+            String selection = null;
+            String []selectionArgs = null;
+            String sortOrder =  null;
+
+            ContentResolver resolver = parentActivty.getContentResolver();
+            Cursor cursor = resolver.query(uri , projections ,selection , selectionArgs , sortOrder);
+            String result = "";
+            while(cursor.moveToNext()){
+                String name = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+                String number = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                String starred = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.STARRED));
+                result += "Name : "+name+" Number: "+number+" Starred: "+starred;
+                result += '\n';
+                Log.i(TAG, "Name : "+name+" Number: "+number+" Starred: "+starred);
+            }
+            return result;
+
         } catch (Exception e) {
             Log.w("UpdateContact", e.getMessage()+"");
             e.printStackTrace();
