@@ -6,15 +6,19 @@ import android.content.SharedPreferences;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.Html;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -23,6 +27,7 @@ import com.bumptech.glide.Glide;
 
 import group.amazcontacts.R;
 import group.amazcontacts.adapter.ContactDetailAdapter;
+import group.amazcontacts.fragment.ContactsFragment;
 import group.amazcontacts.model.AmazTheme;
 import group.amazcontacts.model.Contact;
 import group.amazcontacts.service.ContactDatabaseHandler;
@@ -31,20 +36,25 @@ public class ContactDetailActivity extends AppCompatActivity {
 
     private ImageView avatar;
     private TextView name;
+    private ImageButton buttonEditContact;
     private ListView phoneListView;
     private ActionBar mActionBar;
     private SharedPreferences pref;
-    private Contact c = new Contact();
+    private Contact c;
     private MenuItem item;
+
+    public static int REQUEST_CODE_TO_EDIT_CONTACT = 400;
+    public static int RESULT_CODE_FROM_EDIT_CONTACT = 401;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contact_detail);
         mapping();
         setUpView();
+        setUpEvents();
     }
     private void setUpView(){
-
         mActionBar.setDisplayHomeAsUpEnabled(true);
         mActionBar.setDisplayShowHomeEnabled(true);
         initializeTheme();
@@ -54,6 +64,10 @@ public class ContactDetailActivity extends AppCompatActivity {
         }
         // get contact
         c = (Contact) i.getSerializableExtra("contact");
+        loadContact();
+    }
+
+    private void loadContact() {
         // get avatar
         Glide.with(getApplicationContext()).
                 load(c.getAvatar_url()).
@@ -62,7 +76,17 @@ public class ContactDetailActivity extends AppCompatActivity {
         name.setText(c.getName());
         ContactDetailAdapter contactDetailAdapter = new ContactDetailAdapter(c.getPhoneNumbers() , this);
         phoneListView.setAdapter(contactDetailAdapter);
+    }
 
+    private void setUpEvents(){
+        buttonEditContact.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intentToEditContact = new Intent(getApplicationContext(), EditContactActivity.class);
+                intentToEditContact.putExtra("contactToEdit", c);
+                startActivityForResult(intentToEditContact, REQUEST_CODE_TO_EDIT_CONTACT);
+            }
+        });
     }
 
     @Override
@@ -107,9 +131,11 @@ public class ContactDetailActivity extends AppCompatActivity {
     private void mapping(){
         avatar = findViewById(R.id.contact_avatar);
         name = findViewById(R.id.contact_name);
+        buttonEditContact = findViewById(R.id.buttonEditContact);
         phoneListView = findViewById(R.id.phone_number_listView);
         mActionBar = getSupportActionBar();
         item = findViewById(R.id.change_favorite);
+        c = new Contact();
     }
 
     private void initializeTheme() {
@@ -118,5 +144,17 @@ public class ContactDetailActivity extends AppCompatActivity {
         int colorDrawable = ContextCompat.getColor(getApplicationContext(), colorFromPref);
         mActionBar.setBackgroundDrawable(new ColorDrawable(colorDrawable));
         mActionBar.setTitle(Html.fromHtml("<font color=\"black\">" + getString(R.string.app_name) + "</font>"));
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_TO_EDIT_CONTACT && resultCode == RESULT_CODE_FROM_EDIT_CONTACT) {
+            if (data != null && data.getSerializableExtra("newContact") != null) {
+                //get contact
+                c = (Contact) data.getSerializableExtra("newContact");
+                loadContact();
+            }
+        }
     }
 }

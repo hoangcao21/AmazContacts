@@ -59,43 +59,7 @@ public class AddNewContactActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_save:
-                boolean allValueFilled = true, hasPhoneNumber = true;
-                ArrayList<String> phoneList, typeList;
-                phoneList = new ArrayList<>();
-                typeList = new ArrayList<>();
-                String name = editTextName.getText().toString();
-                if (listViewPhone.getChildCount() == 0) {
-                    hasPhoneNumber = false;
-                    Toast.makeText(this, "Please add at least one phone number", Toast.LENGTH_LONG).show();
-                } else if (name.isEmpty()) {
-                    allValueFilled = false;
-                }
-                for (int i = 0; i < listViewPhone.getChildCount(); i++) {
-                    View v = listViewPhone.getChildAt(i);
-                    Spinner sp = v.findViewById(R.id.spinnerPhoneType);
-                    EditText et = v.findViewById(R.id.editTextPhoneNumber);
-                    String phone = et.getText().toString();
-                    String type = sp.getSelectedItem().toString();
-                    if (phone.isEmpty()) {
-                        allValueFilled = false;
-                        break;
-                    }
-                    phoneList.add(phone);
-                    typeList.add(type);
-                }
-
-                if (!allValueFilled)
-                    Toast.makeText(this, "You have to fill in all the fields!", Toast.LENGTH_LONG).show();
-                else if (hasPhoneNumber) {
-                    try {
-                        addToContactList(this, name, phoneList, typeList);
-                    } catch (Exception e) {
-                        Toast.makeText(this, "Some error occurred!", Toast.LENGTH_SHORT).show();
-                    }
-                    Intent intent = new Intent();
-                    setResult(MainActivity.RESULT_CODE_FROM_ADD_NEW, intent);
-                    finish();
-                }
+                save();
                 break;
             case android.R.id.home:
                 finish();
@@ -115,7 +79,6 @@ public class AddNewContactActivity extends AppCompatActivity {
         mActionBar.setDisplayHomeAsUpEnabled(true);
         mActionBar.setDisplayShowHomeEnabled(true);
         initializeTheme();
-//        addTypeListToSpinner(generateTypes());
     }
 
     private void setUpEvents() {
@@ -128,8 +91,6 @@ public class AddNewContactActivity extends AppCompatActivity {
                 } else {
                     Toast.makeText(AddNewContactActivity.this, "Each contact can only have 5 numbers!", Toast.LENGTH_SHORT).show();
                 }
-
-
             }
         });
     }
@@ -157,8 +118,49 @@ public class AddNewContactActivity extends AppCompatActivity {
         mActionBar.setTitle(Html.fromHtml("<font color=\"black\">" + getString(R.string.app_name) + "</font>"));
     }
 
-    public static void addToContactList(Context context, String strDisplayName, ArrayList<String> phoneList, ArrayList<String> typeList) throws Exception {
+    private void save() {
+        boolean allValueFilled = true;
+        ArrayList<String> phoneList, typeList;
+        phoneList = new ArrayList<>();
+        typeList = new ArrayList<>();
+        String name = editTextName.getText().toString();
+        if (listViewPhone.getChildCount() == 0) {
+            Toast.makeText(this, "Please add at least one phone number", Toast.LENGTH_LONG).show();
+            return;
+        } else if (name.isEmpty()) {
+            allValueFilled = false;
+        }
+        for (int i = 0; i < listViewPhone.getChildCount(); i++) {
+            View v = listViewPhone.getChildAt(i);
+            Spinner sp = v.findViewById(R.id.spinnerPhoneType);
+            EditText et = v.findViewById(R.id.editTextPhoneNumber);
+            String phone = et.getText().toString();
+            String type = sp.getSelectedItem().toString();
+            if (phone.isEmpty()) {
+                allValueFilled = false;
+                break;
+            }
+            phoneList.add(phone);
+            typeList.add(type);
+        }
 
+        if (!allValueFilled) {
+            Toast.makeText(this, "You have to fill in all the fields!", Toast.LENGTH_LONG).show();
+            return;
+        }
+        else {
+            try {
+                addToContactList(this, name, phoneList, typeList);
+            } catch (Exception e) {
+                Toast.makeText(this, "Some error occurred!", Toast.LENGTH_SHORT).show();
+            }
+            Intent intent = new Intent();
+            setResult(MainActivity.RESULT_CODE_FROM_ADD_NEW, intent);
+            finish();
+        }
+    }
+
+    public static int addToContactList(Context context, String strDisplayName, ArrayList<String> phoneList, ArrayList<String> typeList) throws Exception {
         ArrayList<ContentProviderOperation> cntProOper = new ArrayList<>();
         int contactIndex = cntProOper.size();//ContactSize
         ContentResolver contactHelper = context.getContentResolver();
@@ -188,7 +190,8 @@ public class AddNewContactActivity extends AppCompatActivity {
         }
 
         ContentProviderResult[] s = context.getContentResolver().applyBatch(ContactsContract.AUTHORITY, cntProOper); //apply above data insertion into contacts list
-
+        return contactIndex;
     }
+
 
 }

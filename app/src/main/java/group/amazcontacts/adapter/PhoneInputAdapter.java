@@ -3,6 +3,7 @@ package group.amazcontacts.adapter;
 import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -60,6 +61,13 @@ public class PhoneInputAdapter extends BaseAdapter {
         buttonRemovePhoneNumber = view.findViewById(R.id.buttonRemovePhoneNumber);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, spinnerItems);
         spinnerPhoneType.setAdapter(adapter);
+        String typeString = PhoneNumber.getPhoneTypeString(Integer.parseInt(list.get(position).getPhoneType()));
+        for (int j = 0; j < spinnerItems.size(); j++) {
+            if (spinnerItems.get(j).equals(typeString)) {
+                spinnerPhoneType.setSelection(j);
+                notifyDataSetChanged();
+            }
+        }
 
         buttonRemovePhoneNumber.setOnClickListener(new View.OnClickListener() {
             @Override

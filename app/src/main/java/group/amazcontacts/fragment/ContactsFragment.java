@@ -98,7 +98,6 @@ public class ContactsFragment extends Fragment {
         contactListView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
         contactListView.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
             List<Integer> listPositions = new ArrayList<>();
-//            Menu actionModeMenu;
 
             @Override
             public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
@@ -187,11 +186,6 @@ public class ContactsFragment extends Fragment {
 
 
     private static Context contextX;
-
-//    public static Context getContextX() {
-//        return contextX;
-//    }
-
 
     public static void setContacts(Context context, Activity activity) {
         setContacts(context, activity, "");
@@ -356,5 +350,8 @@ public class ContactsFragment extends Fragment {
 
     }
 
+    public static void refresh() {
+
+    }
 
 }

@@ -65,6 +65,8 @@ public class MainActivity extends AppCompatActivity {
     private SearchView searchView;
     private ContactsFragment contactsFragment;
     private SharedPreferences pref;
+
+    private String searchQuery = "";
     private final static int REQUEST_PERMISSION_CODE = 100;
     private static boolean isReadContactsPermissionGranted;
     private static boolean isCallPhonePermissionGranted;
@@ -91,11 +93,14 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences.Editor editor = pref.edit();
 
         requestPermissions(0, getApplicationContext(), MainActivity.this); // Request all permission when creating GUI
-
         setupViews();
-
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        new ContactsUpdateUI(searchQuery).execute("");
+    }
 
     private boolean firstInitial = false;
 
@@ -208,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.main_menu, menu);
 
-        // Cần thiết cho việc dấu search view theo ý Hiếu
+        // Cần thiết cho việc giấu search view theo ý Hiếu
         mainMenu = menu;
 
 
@@ -221,6 +226,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextSubmit(String query) {
+                searchQuery = query;
                 new ContactsUpdateUI(query).execute("");
                 return true;
 //                return false;

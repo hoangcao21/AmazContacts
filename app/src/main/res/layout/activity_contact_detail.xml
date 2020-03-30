@@ -24,9 +24,7 @@
         android:id="@+id/contact_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="131dp"
         android:layout_marginTop="38dp"
-        android:layout_marginEnd="132dp"
 
         android:text="TextView"
         android:textColor="#000000"
@@ -43,5 +41,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/contact_name" />
+
+    <ImageButton
+        android:id="@+id/buttonEditContact"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        app:layout_constraintBottom_toBottomOf="@+id/contact_name"
+        app:layout_constraintStart_toEndOf="@+id/contact_name"
+        app:layout_constraintTop_toTopOf="@+id/contact_name"
+        app:srcCompat="@drawable/baseline_edit_24" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
