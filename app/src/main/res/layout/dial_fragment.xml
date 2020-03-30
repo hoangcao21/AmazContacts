@@ -225,11 +225,11 @@
             android:id="@+id/btnCall"
             android:layout_width="54dp"
             android:layout_height="54dp"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="28dp"
             android:background="@drawable/baseline_call_black_48"
             android:gravity="center"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.47"
+            app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/txt_0" />
 

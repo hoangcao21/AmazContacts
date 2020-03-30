@@ -1,15 +1,8 @@
 package group.amazcontacts.activity;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.Html;
@@ -20,6 +13,13 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+
+import com.bumptech.glide.Glide;
 
 import group.amazcontacts.R;
 import group.amazcontacts.adapter.ContactDetailAdapter;
@@ -55,10 +55,9 @@ public class ContactDetailActivity extends AppCompatActivity {
         // get contact
         c = (Contact) i.getSerializableExtra("contact");
         // get avatar
-        Bitmap bmp;
-        byte[] byteArray = getIntent().getByteArrayExtra("avatar");
-        bmp = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
-        avatar.setImageBitmap(bmp);
+        Glide.with(getApplicationContext()).
+                load(c.getAvatar_url()).
+                into(avatar);
 
         name.setText(c.getName());
         ContactDetailAdapter contactDetailAdapter = new ContactDetailAdapter(c.getPhoneNumbers() , this);
@@ -98,7 +97,7 @@ public class ContactDetailActivity extends AppCompatActivity {
         if(c.isFavored()){
             item.setIcon(R.drawable.baseline_favorite_24);
         }else{
-            item.setIcon(R.drawable.baseline_add_circle_24);
+            item.setIcon(R.drawable.baseline_favorite_border_black_24); // HoangCH đổi icon cho phù hợp bối cảnh thay vì sử dụng icon add khi bỏ check favorite
         }
 
         return true;

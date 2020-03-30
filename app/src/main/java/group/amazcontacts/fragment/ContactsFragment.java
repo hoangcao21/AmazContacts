@@ -29,7 +29,6 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -192,6 +191,7 @@ public class ContactsFragment extends Fragment {
 //    public static Context getContextX() {
 //        return contextX;
 //    }
+
 
     public static void setContacts(Context context, Activity activity) {
         setContacts(context, activity, "");
