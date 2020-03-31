@@ -1,5 +1,8 @@
 package group.amazcontacts.fragment;
 
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -7,6 +10,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -16,9 +21,11 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import java.io.ByteArrayOutputStream;
 import java.util.List;
 
 import group.amazcontacts.R;
+import group.amazcontacts.activity.ContactDetailActivity;
 import group.amazcontacts.adapter.ContactAdapter;
 import group.amazcontacts.adapter.ContactDetailAdapter;
 import group.amazcontacts.model.Contact;
@@ -43,6 +50,7 @@ public class FavoritesFragment extends Fragment {
     private static ProgressBar progressBar;
     private static AppCompatActivity parentActivty;
     private static TextView emotyTextView;
+    private static ContactAdapter contactAdapter;
     public FavoritesFragment() {
         // Required empty public constructor
     }
@@ -93,7 +101,6 @@ public class FavoritesFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.favorites_fragment, container, false);
         return v;
     }
@@ -103,6 +110,24 @@ public class FavoritesFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         favListView = view.findViewById(R.id.fav_list_view);
         favListView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
+        favListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent i = new Intent(getParentActivty() , ContactDetailActivity.class);
+                // data
+                i.putExtra("contact",contactAdapter.getContactList().get(position));
+                // avatar
+                ImageView im =  view.findViewById(R.id.contact_avatar);
+                Bitmap bm = ((BitmapDrawable)im.getDrawable()).getBitmap();
+
+                ByteArrayOutputStream bStream = new ByteArrayOutputStream();
+                bm.compress(Bitmap.CompressFormat.PNG, 100, bStream);
+                byte[] byteArray = bStream.toByteArray();
+                i.putExtra("avatar",byteArray);
+
+                startActivity(i);
+            }
+        });
         progressBar = view.findViewById(R.id.loading_progress_bar);
         emotyTextView = view.findViewById(R.id.empty_textView);
         loadListFavoriteToScreen();
@@ -146,7 +171,8 @@ public class FavoritesFragment extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(ContactAdapter contactAdapter) {
+        protected void onPostExecute(ContactAdapter resultContactAdapter) {
+            contactAdapter = resultContactAdapter;
             if(contactAdapter.getContactList().size() == 0){
                 setEmptyString();
                 doneLoading();
