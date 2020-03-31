@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,7 +26,6 @@ import java.util.List;
 import group.amazcontacts.R;
 import group.amazcontacts.activity.ContactDetailActivity;
 import group.amazcontacts.adapter.ContactAdapter;
-import group.amazcontacts.adapter.ContactDetailAdapter;
 import group.amazcontacts.model.Contact;
 import group.amazcontacts.service.ContactDatabaseHandler;
 
@@ -48,26 +46,26 @@ public class FavoritesFragment extends Fragment {
 
     private static ListView favListView;
     private static ProgressBar progressBar;
-    private static AppCompatActivity parentActivty;
-    private static TextView emotyTextView;
+    private static AppCompatActivity parentActivity;
+    private static TextView emptyTextView;
     private static ContactAdapter contactAdapter;
     public FavoritesFragment() {
         // Required empty public constructor
     }
 
-    public AppCompatActivity getParentActivty() {
-        return parentActivty;
+    public AppCompatActivity getParentActivity() {
+        return parentActivity;
     }
 
-    public void setParentActivty(AppCompatActivity parentActivty) {
-        this.parentActivty = parentActivty;
+    public void setParentActivity(AppCompatActivity parentActivity) {
+        this.parentActivity = parentActivity;
     }
 
     public static ListView getFavListView() {
         return favListView;
     }
 
-    public  void setFavListView(ListView favListView) {
+    public void setFavListView(ListView favListView) {
         this.favListView = favListView;
     }
 
@@ -113,7 +111,7 @@ public class FavoritesFragment extends Fragment {
         favListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent i = new Intent(getParentActivty() , ContactDetailActivity.class);
+                Intent i = new Intent(getParentActivity() , ContactDetailActivity.class);
                 // data
                 i.putExtra("contact",contactAdapter.getContactList().get(position));
                 // avatar
@@ -129,7 +127,7 @@ public class FavoritesFragment extends Fragment {
             }
         });
         progressBar = view.findViewById(R.id.loading_progress_bar);
-        emotyTextView = view.findViewById(R.id.empty_textView);
+        emptyTextView = view.findViewById(R.id.empty_textView);
         loadListFavoriteToScreen();
     }
 
@@ -140,19 +138,31 @@ public class FavoritesFragment extends Fragment {
         progressBar.setVisibility(View.INVISIBLE);
     }
     private static void setEmptyString(){
-        emotyTextView.setVisibility(View.VISIBLE);
+        emptyTextView.setVisibility(View.VISIBLE);
     }
     private static void setNotEmptyString(){
-        emotyTextView.setVisibility(View.INVISIBLE);
+        emptyTextView.setVisibility(View.INVISIBLE);
     }
-    private void loadListFavoriteToScreen(){
-        new FavoriteContactUpdateUI(FavoritesFragment.this).execute();
+
+    public void loadListFavoriteToScreen(){
+        loadListFavoriteToScreen("");
+    }
+
+    public void loadListFavoriteToScreen(String searchKey){
+        new FavoriteContactUpdateUI(FavoritesFragment.this, searchKey).execute();
     }
     static class FavoriteContactUpdateUI extends AsyncTask<Void , String , ContactAdapter>{
         private FavoritesFragment favoritesFragment;
+        private String searchKey;
 
         public FavoriteContactUpdateUI(FavoritesFragment favoritesFragment) {
             this.favoritesFragment = favoritesFragment;
+            this.searchKey = "";
+        }
+
+        public FavoriteContactUpdateUI(FavoritesFragment favoritesFragment, String searchKey) {
+            this.favoritesFragment = favoritesFragment;
+            this.searchKey = searchKey;
         }
 
         @Override
@@ -164,9 +174,9 @@ public class FavoritesFragment extends Fragment {
 
         @Override
         protected ContactAdapter doInBackground(Void... voids) {
-            ContactDatabaseHandler contactDatabaseHandler = new ContactDatabaseHandler(favoritesFragment.getParentActivty());
-            List<Contact> favoriteContacts = contactDatabaseHandler.getListFavContact();
-            ContactAdapter contactAdapter = new ContactAdapter(favoriteContacts, favoritesFragment.getParentActivty());
+            ContactDatabaseHandler contactDatabaseHandler = new ContactDatabaseHandler(favoritesFragment.getParentActivity());
+            List<Contact> favoriteContacts = contactDatabaseHandler.getListFavContact(searchKey);
+            ContactAdapter contactAdapter = new ContactAdapter(favoriteContacts, favoritesFragment.getParentActivity());
             return contactAdapter;
         }
 

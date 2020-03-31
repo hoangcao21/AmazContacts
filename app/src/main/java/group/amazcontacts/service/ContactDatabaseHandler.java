@@ -94,13 +94,18 @@ public class ContactDatabaseHandler {
             return "Something Went Wrong";
         }
     }
-    public List<Contact> getListFavContact(){
+
+    public List<Contact> getListFavContact() {
+        return getListFavContact("");
+    }
+
+    public List<Contact> getListFavContact(String searchKey){
         List<Contact> contacts = new ArrayList<>();
         ContentResolver contentResolver = parentActivty.getContentResolver();
 
         String [] projections = null;
-        String selection = ContactsContract.CommonDataKinds.Phone.STARRED + " = ? ";
-        String [] selectionArgs = {"1"};
+        String selection = ContactsContract.CommonDataKinds.Phone.STARRED + " = ?" + " AND " + ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " LIKE ('%' || ? || '%')";
+        String [] selectionArgs = {"1", searchKey};
         String sortOrder = null;
         try{
             Cursor cursor = contentResolver.query(ContactsContract.Contacts.CONTENT_URI, projections, selection, selectionArgs, sortOrder);

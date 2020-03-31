@@ -14,7 +14,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -67,6 +66,8 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences pref;
 
     private String searchQuery = "";
+    private int searchingTab;
+
     private final static int REQUEST_PERMISSION_CODE = 100;
     private static boolean isReadContactsPermissionGranted;
     private static boolean isCallPhonePermissionGranted;
@@ -95,7 +96,20 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        new ContactsUpdateUI(searchQuery).execute("");
+        if (searchingTab == tabPosition) {
+            if (tabPosition == 1) {
+                new ContactsUpdateUI(searchQuery).execute("");
+            } else if (tabPosition == 2) {
+                new FavoritesUpdateUI(searchQuery).execute("");
+            }
+        } else {
+            if (tabPosition == 1) {
+                new ContactsUpdateUI().execute("");
+            } else if (tabPosition == 2) {
+                new FavoritesUpdateUI().execute("");
+            }
+        }
+
     }
 
     private boolean firstInitial = false;
@@ -106,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
         ContactsFragment contactsFragment = new ContactsFragment();
         contactsFragment.setParentActivty(MainActivity.this);
         FavoritesFragment favoritesFragment = new FavoritesFragment();
-        favoritesFragment.setParentActivty(MainActivity.this);
+        favoritesFragment.setParentActivity(MainActivity.this);
         DialFragment dialFragment = new DialFragment();
         ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), 0);
 
@@ -158,6 +172,16 @@ public class MainActivity extends AppCompatActivity {
                         // Giấu search view khi vào tab Dial Fragment
                         searchMenuItem.setVisible(false);
                         searchView.setVisibility(View.GONE);
+                    }
+
+                    if (tabPosition == 1) {
+//                        toolbar.collapseActionView();
+                        if (!searchQuery.isEmpty()) new ContactsUpdateUI(searchQuery).execute("");
+                    }
+
+                    if (tabPosition == 2) {
+//                        toolbar.collapseActionView();
+                        if (!searchQuery.isEmpty()) new FavoritesUpdateUI(searchQuery).execute("");
                     }
                 } catch (java.lang.NullPointerException ex) {
                     finish();
@@ -219,14 +243,21 @@ public class MainActivity extends AppCompatActivity {
         searchView = (SearchView) menuItem.getActionView();
         searchView.setQueryHint("Search");
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            ListView contactListView = ContactsFragment.getListView();
 
             @Override
             public boolean onQueryTextSubmit(String query) {
-                searchQuery = query;
-                new ContactsUpdateUI(query).execute("");
-                return true;
-//                return false;
+                if (tabPosition == 1) {
+                    searchQuery = query;
+                    searchingTab = tabPosition;
+                    new ContactsUpdateUI(query).execute("");
+                    return true;
+                } else if (tabPosition == 2) {
+                    searchQuery = query;
+                    searchingTab = tabPosition;
+                    new FavoritesUpdateUI(query).execute("");
+                    return true;
+                }
+                return false;
             }
 
             @Override
@@ -244,7 +275,11 @@ public class MainActivity extends AppCompatActivity {
                     //Collapse the action item.
                     toolbar.collapseActionView();
                     //Clear the filter/search query.
-                    new ContactsUpdateUI().execute("");
+                    if (tabPosition == 1) {
+                        new ContactsUpdateUI().execute("");
+                    } else if (tabPosition == 2) {
+                        new FavoritesUpdateUI().execute("");
+                    }
                 }
             }
         });
@@ -435,6 +470,29 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String s) {
             ContactsFragment.setContacts(getApplicationContext(), MainActivity.this, searchKey);
+        }
+    }
+
+    class FavoritesUpdateUI extends AsyncTask<String, String, String> {
+
+        private String searchKey;
+
+        public FavoritesUpdateUI(String searchKey) {
+            this.searchKey = searchKey;
+        }
+
+        public FavoritesUpdateUI() {
+            this.searchKey = "";
+        }
+
+        @Override
+        protected String doInBackground(String... strings) {
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            (new FavoritesFragment()).loadListFavoriteToScreen(searchKey);
         }
     }
 }
