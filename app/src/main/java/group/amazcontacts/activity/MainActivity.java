@@ -264,12 +264,13 @@ public class MainActivity extends AppCompatActivity {
                     searchingTab = tabPosition;
                     new ContactsUpdateUI(query).execute("");
                     return true;
-                } else if (tabPosition == 2) {
-                    searchQuery = query;
-                    searchingTab = tabPosition;
-                    new FavoritesUpdateUI(query).execute("");
-                    return true;
                 }
+//                else if (tabPosition == 2) {
+//                    searchQuery = query;
+//                    searchingTab = tabPosition;
+//                    new FavoritesUpdateUI(query).execute("");
+//                    return true;
+//                }
                 return false;
             }
 
@@ -287,7 +288,7 @@ public class MainActivity extends AppCompatActivity {
                     //Collapse the action item.
                     toolbar.collapseActionView();
                     //Clear the filter/search query.
-                    searchQuery = "";
+//                    searchQuery = "";
                     if (tabPosition == 1) {
                         new ContactsUpdateUI().execute("");
                     } else if (tabPosition == 2) {
@@ -472,7 +473,7 @@ public class MainActivity extends AppCompatActivity {
                 boolean isNewContactAdded = data.getBooleanExtra("isNewContactAdded", false);
 
                 if (isNewContactAdded) {
-                    new ContactsUpdateUI().execute("");
+                    new ContactsUpdateUI(searchQuery).execute("");
                 }
             }
 
