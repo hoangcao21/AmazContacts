@@ -112,7 +112,7 @@ public class ContactDetailActivity extends AppCompatActivity {
                 item.setIcon(R.drawable.baseline_favorite_border_black_24); // HoangCH đổi icon cho phù hợp bối cảnh thay vì sử dụng icon add khi bỏ check favorite
             }
             String result = contactDatabaseHandler.setContactStarById(contactID, newStarred);
-            Toast.makeText(getApplicationContext(), "Result "+result+" ",Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), result,Toast.LENGTH_SHORT).show();
         }catch (Exception e){
             e.printStackTrace();
         }

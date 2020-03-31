@@ -33,7 +33,7 @@
         android:id="@+id/empty_textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="No item in favorite"
+        android:text="No item to show"
         app:layout_constraintBottom_toTopOf="@+id/loading_progress_bar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

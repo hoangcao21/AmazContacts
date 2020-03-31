@@ -154,11 +154,12 @@ public class MainActivity extends AppCompatActivity {
                             && isWriteContactsPermissionGranted) {
 //                    ContactsFragment.setContacts(getApplicationContext(), MainActivity.this);
                         ContactsFragment.getListView().setAdapter(null);
-                        new ContactsUpdateUI().execute("");
+//                        new ContactsUpdateUI().execute("");
                         firstInitial = true;
                     }
 
-                    if (tabPosition == 0 && isCallPhonePermissionGranted && isReadContactsPermissionGranted && isWriteContactsPermissionGranted) {
+                    if (tabPosition == 0
+                            && isCallPhonePermissionGranted && isReadContactsPermissionGranted && isWriteContactsPermissionGranted) {
                         DialFragment.setPhoneNumber("");
                         DialFragment.isPermissionsGranted();
                         // Giấu search view khi vào tab Dial Fragment
@@ -166,7 +167,8 @@ public class MainActivity extends AppCompatActivity {
                         searchView.setVisibility(View.GONE);
                     }
 
-                    if (tabPosition == 0 && (!isCallPhonePermissionGranted || !isReadContactsPermissionGranted || !isWriteContactsPermissionGranted)) {
+                    if (tabPosition == 0 &&
+                            (!isCallPhonePermissionGranted || !isReadContactsPermissionGranted || !isWriteContactsPermissionGranted)) {
                         DialFragment.setPhoneNumber("");
                         requestPermissions(tab.getPosition(), getApplicationContext(), MainActivity.this);
                         // Giấu search view khi vào tab Dial Fragment
@@ -174,14 +176,16 @@ public class MainActivity extends AppCompatActivity {
                         searchView.setVisibility(View.GONE);
                     }
 
-                    if (tabPosition == 1) {
+                    if (tabPosition == 1 &&
+                            isCallPhonePermissionGranted && isReadContactsPermissionGranted && isWriteContactsPermissionGranted) {
 //                        toolbar.collapseActionView();
-                        if (!searchQuery.isEmpty()) new ContactsUpdateUI(searchQuery).execute("");
+                        new ContactsUpdateUI(searchQuery).execute("");
                     }
 
-                    if (tabPosition == 2) {
+                    if (tabPosition == 2 &&
+                            isCallPhonePermissionGranted && isReadContactsPermissionGranted && isWriteContactsPermissionGranted) {
 //                        toolbar.collapseActionView();
-                        if (!searchQuery.isEmpty()) new FavoritesUpdateUI(searchQuery).execute("");
+                        new FavoritesUpdateUI(searchQuery).execute("");
                     }
                 } catch (java.lang.NullPointerException ex) {
                     finish();
@@ -275,6 +279,7 @@ public class MainActivity extends AppCompatActivity {
                     //Collapse the action item.
                     toolbar.collapseActionView();
                     //Clear the filter/search query.
+                    searchQuery = "";
                     if (tabPosition == 1) {
                         new ContactsUpdateUI().execute("");
                     } else if (tabPosition == 2) {
