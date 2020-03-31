@@ -105,8 +105,14 @@ public class ContactDetailActivity extends AppCompatActivity {
             String contactID = c.getId();
             ContactDatabaseHandler contactDatabaseHandler = new ContactDatabaseHandler(ContactDetailActivity.this);
             int newStarred = c.isFavored() ? 0 : 1 ;
+            c.setFavored(!c.isFavored());
+            if(c.isFavored()){
+                item.setIcon(R.drawable.baseline_favorite_24);
+            }else{
+                item.setIcon(R.drawable.baseline_favorite_border_black_24); // HoangCH đổi icon cho phù hợp bối cảnh thay vì sử dụng icon add khi bỏ check favorite
+            }
             String result = contactDatabaseHandler.setContactStarById(contactID, newStarred);
-            Toast.makeText(getApplicationContext(), "Result "+result+" "+newStarred,Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Result "+result+" ",Toast.LENGTH_LONG).show();
         }catch (Exception e){
             e.printStackTrace();
         }

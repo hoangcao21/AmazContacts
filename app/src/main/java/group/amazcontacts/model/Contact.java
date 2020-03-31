@@ -72,4 +72,16 @@ public class Contact implements Serializable {
     public void setFavored(boolean favored) {
         isFavored = favored;
     }
+
+    @Override
+    public String toString() {
+        return "Contact{" +
+                "id='" + id + '\'' +
+                ", email='" + email + '\'' +
+                ", avatar_url='" + avatar_url + '\'' +
+                ", name='" + name + '\'' +
+                ", phoneNumbers=" + phoneNumbers +
+                ", isFavored=" + isFavored +
+                '}';
+    }
 }

@@ -1,13 +1,28 @@
 package group.amazcontacts.fragment;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import java.util.List;
+
 import group.amazcontacts.R;
+import group.amazcontacts.adapter.ContactAdapter;
+import group.amazcontacts.adapter.ContactDetailAdapter;
+import group.amazcontacts.model.Contact;
+import group.amazcontacts.service.ContactDatabaseHandler;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -19,13 +34,33 @@ public class FavoritesFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-
+    private final String TAG = this.getClass().getSimpleName();
 
     private String mParam1;
     private String mParam2;
 
+    private static ListView favListView;
+    private static ProgressBar progressBar;
+    private static AppCompatActivity parentActivty;
+    private static TextView emotyTextView;
     public FavoritesFragment() {
         // Required empty public constructor
+    }
+
+    public AppCompatActivity getParentActivty() {
+        return parentActivty;
+    }
+
+    public void setParentActivty(AppCompatActivity parentActivty) {
+        this.parentActivty = parentActivty;
+    }
+
+    public static ListView getFavListView() {
+        return favListView;
+    }
+
+    public  void setFavListView(ListView favListView) {
+        this.favListView = favListView;
     }
 
     /**
@@ -59,6 +94,79 @@ public class FavoritesFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.favorites_fragment, container, false);
+        View v = inflater.inflate(R.layout.favorites_fragment, container, false);
+        return v;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        favListView = view.findViewById(R.id.fav_list_view);
+        favListView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
+        progressBar = view.findViewById(R.id.loading_progress_bar);
+        emotyTextView = view.findViewById(R.id.empty_textView);
+        loadListFavoriteToScreen();
+    }
+
+    private static void startLoading(){
+
+        progressBar.setVisibility(View.VISIBLE);
+    }
+    private static void doneLoading(){
+        progressBar.setVisibility(View.INVISIBLE);
+    }
+    private static void setEmptyString(){
+        emotyTextView.setVisibility(View.VISIBLE);
+    }
+    private static void setNotEmptyString(){
+        emotyTextView.setVisibility(View.INVISIBLE);
+    }
+    private void loadListFavoriteToScreen(){
+//        ContactDatabaseHandler contactDatabaseHandler = new ContactDatabaseHandler(parentActivty);
+//        List<Contact> favoriteContacts = contactDatabaseHandler.getListFavContact();
+//        ContactAdapter contactAdapter = new ContactAdapter(favoriteContacts, parentActivty);
+//        favListView.setAdapter(contactAdapter);
+//        contactAdapter.notifyDataSetChanged();
+//        if(contactAdapter.getContactList().size() == 0){
+//            setEmptyString();
+//        }else{
+//            setNotEmptyString();
+//        }
+        new FavoriteContactUpdateUI(FavoritesFragment.this).execute();
+    }
+    static class FavoriteContactUpdateUI extends AsyncTask<Void , String , ContactAdapter>{
+        private FavoritesFragment favoritesFragment;
+
+        public FavoriteContactUpdateUI(FavoritesFragment favoritesFragment) {
+            this.favoritesFragment = favoritesFragment;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            startLoading();
+            setNotEmptyString();
+        }
+
+        @Override
+        protected ContactAdapter doInBackground(Void... voids) {
+            ContactDatabaseHandler contactDatabaseHandler = new ContactDatabaseHandler(favoritesFragment.getParentActivty());
+            List<Contact> favoriteContacts = contactDatabaseHandler.getListFavContact();
+            ContactAdapter contactAdapter = new ContactAdapter(favoriteContacts, favoritesFragment.getParentActivty());
+            return contactAdapter;
+        }
+
+        @Override
+        protected void onPostExecute(ContactAdapter contactAdapter) {
+            if(contactAdapter.getContactList().size() == 0){
+                setEmptyString();
+                doneLoading();
+            }else{
+                favListView.setAdapter(contactAdapter);
+                doneLoading();
+                contactAdapter.notifyDataSetChanged();
+            }
+
+        }
     }
 }

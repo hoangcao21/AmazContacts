@@ -110,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
         ContactsFragment contactsFragment = new ContactsFragment();
         contactsFragment.setParentActivty(MainActivity.this);
         FavoritesFragment favoritesFragment = new FavoritesFragment();
+        favoritesFragment.setParentActivty(MainActivity.this);
         DialFragment dialFragment = new DialFragment();
         ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), 0);
 

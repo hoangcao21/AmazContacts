@@ -79,4 +79,12 @@ public class PhoneNumber implements Serializable {
             return "Other";
         }
     }
+
+    @Override
+    public String toString() {
+        return "PhoneNumber{" +
+                "phoneType='" + phoneType + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                '}';
+    }
 }
