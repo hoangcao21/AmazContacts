@@ -93,26 +93,28 @@ public class MainActivity extends AppCompatActivity {
         setupViews();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (searchingTab == tabPosition) {
-            if (tabPosition == 1) {
-                new ContactsUpdateUI(searchQuery).execute("");
-            } else if (tabPosition == 2) {
-                new FavoritesUpdateUI(searchQuery).execute("");
-            }
-        } else {
-            if (tabPosition == 1) {
-                new ContactsUpdateUI().execute("");
-            } else if (tabPosition == 2) {
-                new FavoritesUpdateUI().execute("");
-            }
-        }
-
-    }
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+//        if (searchingTab == tabPosition) {
+//            if (tabPosition == 1) {
+//                new ContactsUpdateUI(searchQuery).execute("");
+//            } else if (tabPosition == 2) {
+//                new FavoritesUpdateUI(searchQuery).execute("");
+//            }
+//        } else {
+//            if (tabPosition == 1) {
+//                new ContactsUpdateUI().execute("");
+//            } else if (tabPosition == 2) {
+//                new FavoritesUpdateUI().execute("");
+//            }
+//        }
+//
+//    }
 
     private boolean firstInitial = false;
+    private boolean firstLoadOfContacts = false;
+    private boolean firstLoadOfFavorites = false;
 
     private void setupViews() {
 
@@ -177,15 +179,22 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     if (tabPosition == 1 &&
-                            isCallPhonePermissionGranted && isReadContactsPermissionGranted && isWriteContactsPermissionGranted) {
+                            isReadContactsPermissionGranted && isWriteContactsPermissionGranted) {
 //                        toolbar.collapseActionView();
-                        new ContactsUpdateUI(searchQuery).execute("");
+                        if (!firstLoadOfContacts) {
+                            new ContactsUpdateUI(searchQuery).execute("");
+                            firstLoadOfContacts = true;
+                        }
                     }
 
                     if (tabPosition == 2 &&
-                            isCallPhonePermissionGranted && isReadContactsPermissionGranted && isWriteContactsPermissionGranted) {
-//                        toolbar.collapseActionView();
-                        new FavoritesUpdateUI(searchQuery).execute("");
+                            isReadContactsPermissionGranted && isWriteContactsPermissionGranted) {
+                        searchMenuItem.setVisible(false);
+                        searchView.setVisibility(View.GONE);
+                        if (!firstLoadOfContacts) {
+                            new FavoritesUpdateUI(searchQuery).execute("");
+                            firstLoadOfFavorites = true;
+                        }
                     }
                 } catch (java.lang.NullPointerException ex) {
                     finish();
@@ -227,7 +236,7 @@ public class MainActivity extends AppCompatActivity {
         changeToolbarColor(colorFromPref);
     }
 
-    public void changeToolbarColor(int color){
+    public void changeToolbarColor(int color) {
         toolbar.setBackgroundColor(getResources().getColor(color));
     }
 
@@ -274,8 +283,7 @@ public class MainActivity extends AppCompatActivity {
         searchView.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus)
-                {
+                if (!hasFocus) {
                     //Collapse the action item.
                     toolbar.collapseActionView();
                     //Clear the filter/search query.
@@ -435,6 +443,7 @@ public class MainActivity extends AppCompatActivity {
         if (tabPosition == 1 && isReadContactsPermissionGranted && isWriteContactsPermissionGranted) {
             new ContactsUpdateUI().execute("");
             firstInitial = true;
+            firstLoadOfContacts = true;
         } else if (tabPosition == 0 && isCallPhonePermissionGranted && isReadContactsPermissionGranted && isWriteContactsPermissionGranted) {
             DialFragment.isPermissionsGranted();
         }
@@ -449,8 +458,12 @@ public class MainActivity extends AppCompatActivity {
                 int color = data.getIntExtra("color", AmazTheme.BLUE_ACCENT);
                 changeToolbarColor(color);
                 Log.i("test", "get result successfully");
-            } else { // data == null trường hợp của HoangCH
-                ContactsFragment.setContacts(getApplicationContext(), MainActivity.this);
+
+                boolean isDownloadDone = data.getBooleanExtra("isDownloadDone", false);
+
+                if (isDownloadDone) {
+                    new ContactsUpdateUI().execute("");
+                }
             }
         }
     }

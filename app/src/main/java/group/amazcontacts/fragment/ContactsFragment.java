@@ -58,6 +58,9 @@ public class ContactsFragment extends Fragment {
     private static ListView contactListView;
     private static View thisView;
     private AppCompatActivity parentActivty;
+    public static int REQUEST_CODE_TO_CONTACT_DETAIL = 500;
+    public static int RESULT_CODE_FROM_CONTACT_DETAIL = 501;
+
     public ContactsFragment() {
         // Required empty public constructor
     }
@@ -144,6 +147,7 @@ public class ContactsFragment extends Fragment {
 
                             // After deleting contacts, update UI and finish action mode tool bar (X contacts selected.)
                             new ContactsUpdateUI(getActivity()).execute("");
+                            FavoritesFragment.loadListFavoriteToScreenGlobal("");
                             if (mode != null)
                                 mode.finish();
                         }
@@ -166,24 +170,37 @@ public class ContactsFragment extends Fragment {
         contactListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent i = new Intent(getParentActivty() , ContactDetailActivity.class);
+                Intent i = new Intent(getParentActivty(), ContactDetailActivity.class);
                 // data
-                i.putExtra("contact",contactList.get(position));
+                i.putExtra("contact", contactList.get(position));
                 // avatar
-                ImageView im =  view.findViewById(R.id.contact_avatar);
-                Bitmap bm = ((BitmapDrawable)im.getDrawable()).getBitmap();
+                ImageView im = view.findViewById(R.id.contact_avatar);
+                Bitmap bm = ((BitmapDrawable) im.getDrawable()).getBitmap();
 
                 ByteArrayOutputStream bStream = new ByteArrayOutputStream();
                 bm.compress(Bitmap.CompressFormat.PNG, 100, bStream);
                 byte[] byteArray = bStream.toByteArray();
-                i.putExtra("avatar",byteArray);
+                i.putExtra("avatar", byteArray);
 
-                startActivity(i);
+                startActivityForResult(i, REQUEST_CODE_TO_CONTACT_DETAIL);
             }
         });
         setContacts(getContext(), getActivity());
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_TO_CONTACT_DETAIL
+                && resultCode == RESULT_CODE_FROM_CONTACT_DETAIL) {
+            boolean contactEdited = data.getBooleanExtra("contactEdited", false);
+            boolean isMarkFavorite = data.getBooleanExtra("isMarkFavorite", false);
+            if (contactEdited || isMarkFavorite) {
+                new ContactsUpdateUI(getActivity()).execute();
+                FavoritesFragment.loadListFavoriteToScreenGlobal("");
+            }
+        }
+    }
 
     private static Context contextX;
 

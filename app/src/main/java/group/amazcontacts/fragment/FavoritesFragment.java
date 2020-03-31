@@ -49,6 +49,10 @@ public class FavoritesFragment extends Fragment {
     private static AppCompatActivity parentActivity;
     private static TextView emptyTextView;
     private static ContactAdapter contactAdapter;
+    public static int REQUEST_CODE_TO_CONTACT_DETAIL = 500;
+    public static int RESULT_CODE_FROM_CONTACT_DETAIL = 501;
+    private static FavoritesFragment fragment;
+
     public FavoritesFragment() {
         // Required empty public constructor
     }
@@ -58,7 +62,7 @@ public class FavoritesFragment extends Fragment {
     }
 
     public void setParentActivity(AppCompatActivity parentActivity) {
-        this.parentActivity = parentActivity;
+        FavoritesFragment.parentActivity = parentActivity;
     }
 
     public static ListView getFavListView() {
@@ -66,7 +70,7 @@ public class FavoritesFragment extends Fragment {
     }
 
     public void setFavListView(ListView favListView) {
-        this.favListView = favListView;
+        FavoritesFragment.favListView = favListView;
     }
 
     /**
@@ -90,6 +94,7 @@ public class FavoritesFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        fragment = FavoritesFragment.this;
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
@@ -111,19 +116,19 @@ public class FavoritesFragment extends Fragment {
         favListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent i = new Intent(getParentActivity() , ContactDetailActivity.class);
+                Intent i = new Intent(getParentActivity(), ContactDetailActivity.class);
                 // data
-                i.putExtra("contact",contactAdapter.getContactList().get(position));
+                i.putExtra("contact", contactAdapter.getContactList().get(position));
                 // avatar
-                ImageView im =  view.findViewById(R.id.contact_avatar);
-                Bitmap bm = ((BitmapDrawable)im.getDrawable()).getBitmap();
+                ImageView im = view.findViewById(R.id.contact_avatar);
+                Bitmap bm = ((BitmapDrawable) im.getDrawable()).getBitmap();
 
                 ByteArrayOutputStream bStream = new ByteArrayOutputStream();
                 bm.compress(Bitmap.CompressFormat.PNG, 100, bStream);
                 byte[] byteArray = bStream.toByteArray();
-                i.putExtra("avatar",byteArray);
+                i.putExtra("avatar", byteArray);
 
-                startActivity(i);
+                startActivityForResult(i, REQUEST_CODE_TO_CONTACT_DETAIL);
             }
         });
         progressBar = view.findViewById(R.id.loading_progress_bar);
@@ -131,29 +136,56 @@ public class FavoritesFragment extends Fragment {
         loadListFavoriteToScreen();
     }
 
-    private static void startLoading(){
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_TO_CONTACT_DETAIL
+                && resultCode == RESULT_CODE_FROM_CONTACT_DETAIL) {
+            boolean contactEdited = data.getBooleanExtra("contactEdited", false);
+            boolean isMarkFavorite = data.getBooleanExtra("isMarkFavorite", false);
+            if (contactEdited) {
+                ContactsFragment.setContacts(getContext(), getActivity());
+                FavoritesFragment.loadListFavoriteToScreenGlobal("");
+            }
+
+            if (isMarkFavorite) {
+                ContactsFragment.setContacts(getContext(), getActivity());
+                FavoritesFragment.loadListFavoriteToScreenGlobal("");
+            }
+        }
+    }
+
+    private static void startLoading() {
         progressBar.setVisibility(View.VISIBLE);
     }
-    private static void doneLoading(){
+
+    private static void doneLoading() {
         progressBar.setVisibility(View.INVISIBLE);
     }
-    private static void setEmptyString(){
+
+    private static void setEmptyString() {
         emptyTextView.setVisibility(View.VISIBLE);
         favListView.setVisibility(View.INVISIBLE);
     }
-    private static void setNotEmptyString(){
+
+    private static void setNotEmptyString() {
         emptyTextView.setVisibility(View.INVISIBLE);
         favListView.setVisibility(View.VISIBLE);
     }
 
-    public void loadListFavoriteToScreen(){
+    public void loadListFavoriteToScreen() {
         loadListFavoriteToScreen("");
     }
 
-    public void loadListFavoriteToScreen(String searchKey){
+    public void loadListFavoriteToScreen(String searchKey) {
         new FavoriteContactUpdateUI(FavoritesFragment.this, searchKey).execute();
     }
-    static class FavoriteContactUpdateUI extends AsyncTask<Void , String , ContactAdapter>{
+
+    public static void loadListFavoriteToScreenGlobal(String searchKey) {
+        new FavoriteContactUpdateUI(fragment, searchKey).execute();
+    }
+
+    static class FavoriteContactUpdateUI extends AsyncTask<Void, String, ContactAdapter> {
         private FavoritesFragment favoritesFragment;
         private String searchKey;
 
@@ -185,10 +217,10 @@ public class FavoritesFragment extends Fragment {
         @Override
         protected void onPostExecute(ContactAdapter resultContactAdapter) {
             contactAdapter = resultContactAdapter;
-            if(contactAdapter.getContactList().size() == 0){
+            if (contactAdapter.getContactList().size() == 0) {
                 setEmptyString();
                 doneLoading();
-            }else{
+            } else {
                 favListView.setAdapter(contactAdapter);
                 doneLoading();
                 contactAdapter.notifyDataSetChanged();

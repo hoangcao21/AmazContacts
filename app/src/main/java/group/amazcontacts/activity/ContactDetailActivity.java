@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.Html;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -27,7 +26,6 @@ import com.bumptech.glide.Glide;
 
 import group.amazcontacts.R;
 import group.amazcontacts.adapter.ContactDetailAdapter;
-import group.amazcontacts.fragment.ContactsFragment;
 import group.amazcontacts.model.AmazTheme;
 import group.amazcontacts.model.Contact;
 import group.amazcontacts.service.ContactDatabaseHandler;
@@ -46,6 +44,8 @@ public class ContactDetailActivity extends AppCompatActivity {
     public static int REQUEST_CODE_TO_EDIT_CONTACT = 400;
     public static int RESULT_CODE_FROM_EDIT_CONTACT = 401;
 
+    public static int RESULT_CODE_FROM_CONTACT_DETAIL = 501;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,12 +54,13 @@ public class ContactDetailActivity extends AppCompatActivity {
         setUpView();
         setUpEvents();
     }
-    private void setUpView(){
+
+    private void setUpView() {
         mActionBar.setDisplayHomeAsUpEnabled(true);
         mActionBar.setDisplayShowHomeEnabled(true);
         initializeTheme();
         Intent i = getIntent();
-        if ( i == null ){
+        if (i == null) {
             return;
         }
         // get contact
@@ -74,11 +75,11 @@ public class ContactDetailActivity extends AppCompatActivity {
                 into(avatar);
 
         name.setText(c.getName());
-        ContactDetailAdapter contactDetailAdapter = new ContactDetailAdapter(c.getPhoneNumbers() , this);
+        ContactDetailAdapter contactDetailAdapter = new ContactDetailAdapter(c.getPhoneNumbers(), this);
         phoneListView.setAdapter(contactDetailAdapter);
     }
 
-    private void setUpEvents(){
+    private void setUpEvents() {
         buttonEditContact.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -91,8 +92,18 @@ public class ContactDetailActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case android.R.id.home:
+                Intent intent = new Intent();
+                if (contactEdited) {
+                    intent.putExtra("contactEdited", true);
+                }
+
+                if (isMarkFavorite) {
+                    intent.putExtra("isMarkFavorite", true);
+                }
+
+                setResult(RESULT_CODE_FROM_CONTACT_DETAIL, intent);
                 finish();
                 break;
             case R.id.change_favorite:
@@ -100,20 +111,24 @@ public class ContactDetailActivity extends AppCompatActivity {
         }
         return true;
     }
-    private void handleMarkFavorite(MenuItem item){
+
+    private boolean isMarkFavorite = false;
+
+    private void handleMarkFavorite(MenuItem item) {
         try {
             String contactID = c.getId();
             ContactDatabaseHandler contactDatabaseHandler = new ContactDatabaseHandler(ContactDetailActivity.this);
-            int newStarred = c.isFavored() ? 0 : 1 ;
+            int newStarred = c.isFavored() ? 0 : 1;
             c.setFavored(!c.isFavored());
-            if(c.isFavored()){
+            if (c.isFavored()) {
                 item.setIcon(R.drawable.baseline_favorite_24);
-            }else{
+            } else {
                 item.setIcon(R.drawable.baseline_favorite_border_black_24); // HoangCH đổi icon cho phù hợp bối cảnh thay vì sử dụng icon add khi bỏ check favorite
             }
             String result = contactDatabaseHandler.setContactStarById(contactID, newStarred);
-            Toast.makeText(getApplicationContext(), result,Toast.LENGTH_SHORT).show();
-        }catch (Exception e){
+            Toast.makeText(getApplicationContext(), result, Toast.LENGTH_SHORT).show();
+            isMarkFavorite = true;
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -124,9 +139,9 @@ public class ContactDetailActivity extends AppCompatActivity {
         menuInflater.inflate(R.menu.contact_detail_menu, menu);
         MenuItem item = menu.findItem(R.id.change_favorite);
 
-        if(c.isFavored()){
+        if (c.isFavored()) {
             item.setIcon(R.drawable.baseline_favorite_24);
-        }else{
+        } else {
             item.setIcon(R.drawable.baseline_favorite_border_black_24); // HoangCH đổi icon cho phù hợp bối cảnh thay vì sử dụng icon add khi bỏ check favorite
         }
 
@@ -134,7 +149,7 @@ public class ContactDetailActivity extends AppCompatActivity {
     }
 
 
-    private void mapping(){
+    private void mapping() {
         avatar = findViewById(R.id.contact_avatar);
         name = findViewById(R.id.contact_name);
         buttonEditContact = findViewById(R.id.buttonEditContact);
@@ -152,6 +167,8 @@ public class ContactDetailActivity extends AppCompatActivity {
         mActionBar.setTitle(Html.fromHtml("<font color=\"black\">" + getString(R.string.app_name) + "</font>"));
     }
 
+    private boolean contactEdited = false;
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -160,6 +177,7 @@ public class ContactDetailActivity extends AppCompatActivity {
                 //get contact
                 c = (Contact) data.getSerializableExtra("newContact");
                 loadContact();
+                contactEdited = true;
             }
         }
     }

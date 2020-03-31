@@ -32,7 +32,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
@@ -131,9 +130,17 @@ public class SettingActivity extends AppCompatActivity {
 
         textViewName.setText(currentUser.getDisplayName());
         textViewEmail.setText(currentUser.getEmail());
-        Glide.with(getApplicationContext()).
-                load(currentUser.getPhotoUrl()).
-                into(profileAvatar);
+
+        if (currentUser.getPhotoUrl() != null) {
+            Glide.with(getApplicationContext()).
+                    load(currentUser.getPhotoUrl()).
+                    into(profileAvatar);
+        } else {
+            Uri uri = Uri.parse("android.resource://group.amazcontacts/" + R.mipmap.default_contact_avatar);
+            Glide.with(getApplicationContext()).
+                    load(uri).
+                    into(profileAvatar);
+        }
 
         firebaseDatabase = FirebaseDatabase.getInstance();
         firebaseStorage = FirebaseStorage.getInstance();
@@ -167,10 +174,11 @@ public class SettingActivity extends AppCompatActivity {
         if (item.getItemId() == android.R.id.home) {
             Intent intent = new Intent();
             if (THEME_COLOR != 0) intent.putExtra("color", THEME_COLOR);
+            intent.putExtra("isDownloadDone", isDownloadDone);
             setResult(MainActivity.RESULT_CODE_FROM_SETTINGS, intent);
             finish();
         }
-        return true;
+        return super.onOptionsItemSelected(item);
     }
 
     private void setEvents() {
@@ -272,6 +280,7 @@ public class SettingActivity extends AppCompatActivity {
 
             FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
             DatabaseReference itemsRef = databaseReference.child(firebaseUser.getUid()).child("items");
+            Log.i("Firebase User id: ", firebaseUser.getUid());
             itemsRef.removeValue();
             for (int i = 0; i < contactList.size(); i++) {
                 final Uri[] downloadUri = {null};
@@ -602,9 +611,12 @@ public class SettingActivity extends AppCompatActivity {
 
             if (s.equals("OK")) {
                 Toast.makeText(getApplicationContext(), "Download successfully!", Toast.LENGTH_LONG).show();
+                isDownloadDone = true;
             }
         }
     }
+
+    private boolean isDownloadDone = false;
 
     private Bitmap bitmap;
     private boolean fetchImageDone;
