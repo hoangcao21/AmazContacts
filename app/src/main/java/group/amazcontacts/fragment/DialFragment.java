@@ -1,12 +1,10 @@
 package group.amazcontacts.fragment;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -215,7 +213,6 @@ public class DialFragment extends Fragment {
         }
     }
 
-    // TODO: Chỉnh sửa lại query cho giống với query bên ContactFragment
     public static List<Contact> getContacts(Context ctx, String phoneNumberToFind) {
         List<Contact> list = new ArrayList<>();
 
