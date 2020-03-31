@@ -27,13 +27,22 @@ public class PhoneNumber implements Serializable {
     }
 
     public static int getPhoneTypeInt(String type) {
-        if (type.equals("Home")) return ContactsContract.CommonDataKinds.Phone.TYPE_HOME;
-        if (type.equals("Mobile")) return ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE;
-        if (type.equals("Work")) return ContactsContract.CommonDataKinds.Phone.TYPE_WORK;
-        if (type.equals("Main")) return ContactsContract.CommonDataKinds.Phone.TYPE_MAIN;
-        if (type.equals("Custom")) return ContactsContract.CommonDataKinds.Phone.TYPE_CUSTOM;
-        if (type.equals("Pager")) return ContactsContract.CommonDataKinds.Phone.TYPE_PAGER;
-        return ContactsContract.CommonDataKinds.Phone.TYPE_OTHER;
+        switch (type) {
+            case "Home":
+                return ContactsContract.CommonDataKinds.Phone.TYPE_HOME;
+            case "Mobile":
+                return ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE;
+            case "Work":
+                return ContactsContract.CommonDataKinds.Phone.TYPE_WORK;
+            case "Main":
+                return ContactsContract.CommonDataKinds.Phone.TYPE_MAIN;
+            case "Custom":
+                return ContactsContract.CommonDataKinds.Phone.TYPE_CUSTOM;
+            case "Pager":
+                return ContactsContract.CommonDataKinds.Phone.TYPE_PAGER;
+            default:
+                return ContactsContract.CommonDataKinds.Phone.TYPE_OTHER;
+        }
     }
 
     public static String getPhoneTypeString(int type) {

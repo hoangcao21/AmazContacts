@@ -88,10 +88,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mapping();
-
-        SharedPreferences pref = getApplicationContext().getSharedPreferences("AmazContacts", MODE_PRIVATE); // 0 - for private mode
-        SharedPreferences.Editor editor = pref.edit();
-
         requestPermissions(0, getApplicationContext(), MainActivity.this); // Request all permission when creating GUI
         setupViews();
     }
@@ -151,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
                     if (tabPosition == 0 && isCallPhonePermissionGranted && isReadContactsPermissionGranted && isWriteContactsPermissionGranted) {
                         DialFragment.setPhoneNumber("");
                         DialFragment.isPermissionsGranted();
-                        // Dấu search view khi vào tab Dial Fragment
+                        // Giấu search view khi vào tab Dial Fragment
                         searchMenuItem.setVisible(false);
                         searchView.setVisibility(View.GONE);
                     }
@@ -159,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
                     if (tabPosition == 0 && (!isCallPhonePermissionGranted || !isReadContactsPermissionGranted || !isWriteContactsPermissionGranted)) {
                         DialFragment.setPhoneNumber("");
                         requestPermissions(tab.getPosition(), getApplicationContext(), MainActivity.this);
-                        // Dấu search view khi vào tab Dial Fragment
+                        // Giấu search view khi vào tab Dial Fragment
                         searchMenuItem.setVisible(false);
                         searchView.setVisibility(View.GONE);
                     }
@@ -369,24 +365,28 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestCode == REQUEST_PERMISSION_CODE) {
             for (int i = 0; i < permissions.length; i++) {
-                if (permissions[i].equals(Manifest.permission.CALL_PHONE)) {
-                    if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
-                        isCallPhonePermissionGranted = true;
-                        editor.putBoolean("isCallPhonePermissionGranted", true);
-                        editor.apply();
-                    }
-                } else if (permissions[i].equals(Manifest.permission.READ_CONTACTS)) {
-                    if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
-                        isReadContactsPermissionGranted = true;
-                        editor.putBoolean("isReadContactsPermissionGranted", true);
-                        editor.apply();
-                    }
-                } else if (permissions[i].equals(Manifest.permission.WRITE_CONTACTS)) {
-                    if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
-                        isWriteContactsPermissionGranted = true;
-                        editor.putBoolean("isWriteContactsPermissionGranted", true);
-                        editor.apply();
-                    }
+                switch (permissions[i]) {
+                    case Manifest.permission.CALL_PHONE:
+                        if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                            isCallPhonePermissionGranted = true;
+                            editor.putBoolean("isCallPhonePermissionGranted", true);
+                            editor.apply();
+                        }
+                        break;
+                    case Manifest.permission.READ_CONTACTS:
+                        if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                            isReadContactsPermissionGranted = true;
+                            editor.putBoolean("isReadContactsPermissionGranted", true);
+                            editor.apply();
+                        }
+                        break;
+                    case Manifest.permission.WRITE_CONTACTS:
+                        if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                            isWriteContactsPermissionGranted = true;
+                            editor.putBoolean("isWriteContactsPermissionGranted", true);
+                            editor.apply();
+                        }
+                        break;
                 }
             }
         }
