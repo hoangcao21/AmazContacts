@@ -325,7 +325,8 @@ public class DialFragment extends Fragment {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     Contact c = contactAdapter.getContactList().get(position);
-                    txtPhoneNumber.setText(c.getPhoneNumbers().get(0).getPhoneNumber());
+                    phoneNumber = c.getPhoneNumbers().get(0).getPhoneNumber();
+                    txtPhoneNumber.setText(phoneNumber);
                 }
             });
         }
