@@ -55,21 +55,23 @@ public class LoginActivity extends AppCompatActivity {
                 prepareUIForlogin();
                 String email = emailEdittext.getText().toString();
                 String password = passwordEdittext.getText().toString();
+                if(email.isEmpty() || password.isEmpty()){
+                    Toast.makeText(getApplicationContext(), "Email and password cannot be empty", Toast.LENGTH_LONG).show();
+                    progressBar.setVisibility(View.INVISIBLE);
+                    return;
+                }
                 firebaseAuth.signInWithEmailAndPassword(email , password).addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        FirebaseUser user = firebaseAuth.getCurrentUser();
-                        Toast.makeText(getApplicationContext(), "Login successfully",Toast.LENGTH_LONG).show();
-                        prepareUIforLoginResult();
-                        Intent i = new Intent(LoginActivity.this , MainActivity.class);
-                        startActivity(i);
-                    }
-                }).addOnFailureListener(LoginActivity.this, new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(getApplicationContext(), "Login failed",Toast.LENGTH_LONG).show();
-                        e.printStackTrace();
-                        prepareUIforLoginResult();
+                        if(task.isSuccessful()){
+                            FirebaseUser user = firebaseAuth.getCurrentUser();
+                            Toast.makeText(getApplicationContext(), "Sign in with "+user.getEmail(), Toast.LENGTH_LONG).show();
+                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                            startActivity(intent);
+                        }else{
+                            Toast.makeText(getApplicationContext(), "Sign in failed: "+task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                        progressBar.setVisibility(View.INVISIBLE);
                     }
                 });
 

@@ -56,6 +56,11 @@ public class SignUpActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.VISIBLE);
                 final String email = emailEditText.getText().toString();
                 String password = passwordEditText.getText().toString();
+                if(email.isEmpty() || password.isEmpty()){
+                    Toast.makeText(getApplicationContext(), "Email and password cannot be empty", Toast.LENGTH_LONG).show();
+                    progressBar.setVisibility(View.INVISIBLE);
+                    return;
+                }
                 firebaseAuth.createUserWithEmailAndPassword(email , password)
                         .addOnCompleteListener( new OnCompleteListener<AuthResult>() {
                             @Override
@@ -66,7 +71,7 @@ public class SignUpActivity extends AppCompatActivity {
                                     Intent intent = new Intent(SignUpActivity.this, MainActivity.class);
                                     startActivity(intent);
                                 }else{
-                                    Toast.makeText(getApplicationContext(), "Created user failed ",Toast.LENGTH_LONG).show();
+                                    Toast.makeText(getApplicationContext(), "Created user failed "+task.getException().getMessage(),Toast.LENGTH_LONG).show();
                                     Log.e(TAG, "on sign up fail: "+task.getException());
                                 }
                                 progressBar.setVisibility(View.INVISIBLE);
