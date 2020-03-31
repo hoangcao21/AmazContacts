@@ -139,9 +139,11 @@ public class FavoritesFragment extends Fragment {
     }
     private static void setEmptyString(){
         emptyTextView.setVisibility(View.VISIBLE);
+        favListView.setVisibility(View.INVISIBLE);
     }
     private static void setNotEmptyString(){
         emptyTextView.setVisibility(View.INVISIBLE);
+        favListView.setVisibility(View.VISIBLE);
     }
 
     public void loadListFavoriteToScreen(){

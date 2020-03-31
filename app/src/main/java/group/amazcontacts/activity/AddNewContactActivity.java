@@ -6,6 +6,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -162,10 +163,10 @@ public class AddNewContactActivity extends AppCompatActivity {
         }
     }
 
-    public static int addToContactList(Context context, String strDisplayName, ArrayList<String> phoneList, ArrayList<String> typeList) throws Exception {
+    public static long addToContactList(Context context, String strDisplayName, ArrayList<String> phoneList, ArrayList<String> typeList) throws Exception {
         ArrayList<ContentProviderOperation> cntProOper = new ArrayList<>();
         int contactIndex = cntProOper.size();//ContactSize
-        ContentResolver contactHelper = context.getContentResolver();
+        ContentResolver contentResolver = context.getContentResolver();
 
         cntProOper.add(ContentProviderOperation.newInsert(ContactsContract.RawContacts.CONTENT_URI)//Step1
                 .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, null)
@@ -188,11 +189,17 @@ public class AddNewContactActivity extends AppCompatActivity {
                     .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, contactIndex)
                     .withValue(android.provider.ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
                     .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phone) // Number to be added
-                    .withValue(ContactsContract.CommonDataKinds.Phone.TYPE, rawContactPhoneType).build()); //Type like HOME, MOBILE etc
+                    .withValue(ContactsContract.CommonDataKinds.Phone.TYPE, rawContactPhoneType) //Type like HOME, MOBILE etc
+                    .build());
         }
 
-        ContentProviderResult[] s = context.getContentResolver().applyBatch(ContactsContract.AUTHORITY, cntProOper); //apply above data insertion into contacts list
-        return contactIndex;
+        final ContentProviderResult[] results = context.getContentResolver().applyBatch(ContactsContract.AUTHORITY, cntProOper); //apply above data insertion into contacts list
+        final String[] projection = new String[] { ContactsContract.RawContacts.CONTACT_ID };
+        final Cursor cursor = contentResolver.query(results[0].uri, projection, null, null, null);
+        cursor.moveToNext();
+        long contactId = cursor.getLong(0);
+        cursor.close();
+        return contactId;
     }
 
 

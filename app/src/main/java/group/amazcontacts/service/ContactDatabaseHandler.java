@@ -50,14 +50,14 @@ public class ContactDatabaseHandler {
             String [] selectionArgs = new String [] {id};
             contentProviderOperations.add(ContentProviderOperation.newUpdate(ContactsContract.RawContacts.CONTENT_URI)
                     .withSelection(selection , selectionArgs)
-                    .withValue(ContactsContract.CommonDataKinds.Phone.STARRED, newStarred ).build());
+                    .withValue(ContactsContract.CommonDataKinds.Phone.STARRED, newStarred).build());
             ContentProviderResult[] results = parentActivty.getContentResolver().applyBatch(ContactsContract.AUTHORITY, contentProviderOperations);
             Log.i(TAG, "setContactStarById: result"+results);
             Log.i(TAG, "setContactStarById: getAllContact"+getAllContact());
-            if (results.length >0){
+            if (newStarred != 0){
                 return "Mark as favorite";
-            }else{
-                return "Mark as not favorite ";
+            } else {
+                return "Remove from favorite";
             }
 
         } catch (Exception e) {
@@ -66,6 +66,7 @@ public class ContactDatabaseHandler {
             return "Something Went Wrong";
         }
     }
+
     public String getAllContact(){
         try {
             Uri uri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
@@ -76,15 +77,15 @@ public class ContactDatabaseHandler {
             String sortOrder =  null;
 
             ContentResolver resolver = parentActivty.getContentResolver();
-            Cursor cursor = resolver.query(uri , projections ,selection , selectionArgs , sortOrder);
+            Cursor cursor = resolver.query(uri, projections, selection, selectionArgs, sortOrder);
             String result = "";
             while(cursor.moveToNext()){
                 String name = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
                 String number = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
                 String starred = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.STARRED));
-                result += "Name : "+name+" Number: "+number+" Starred: "+starred;
-                result += '\n';
-                Log.i(TAG, "Name : "+name+" Number: "+number+" Starred: "+starred);
+//                result += "Name : "+name+" Number: "+number+" Starred: "+starred;
+//                result += '\n';
+//                Log.i(TAG, "Name : "+name+" Number: "+number+" Starred: "+starred);
             }
             return result;
 

@@ -1,5 +1,7 @@
 package group.amazcontacts.activity;
 
+import android.content.ContentProviderOperation;
+import android.content.ContentProviderResult;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -171,13 +173,14 @@ public class EditContactActivity extends AppCompatActivity {
                 oldContact.setEmail(contact.getEmail());
                 oldContact.setFavored(contact.isFavored());
                 deleteContactById(Long.parseLong(contactId));
-                int newContactId = AddNewContactActivity.addToContactList(this, name, phoneList, typeList);
+                long newContactId = AddNewContactActivity.addToContactList(this, name, phoneList, typeList);
                 contact.setName(name);
                 contact.setPhoneNumbers(newPhoneNumberList);
                 contact.setId(String.valueOf(newContactId));
                 contact.setEmail(oldContact.getEmail());
                 contact.setFavored(oldContact.isFavored());
                 contact.setAvatar_url(oldContact.getAvatar_url());
+                setContactStarById(String.valueOf(newContactId), contact.isFavored());
                 intent.putExtra("newContact", contact);
             } catch (Exception e) {
                 Toast.makeText(this, "Some error occurred!", Toast.LENGTH_SHORT).show();
@@ -185,6 +188,23 @@ public class EditContactActivity extends AppCompatActivity {
         }
         setResult(ContactDetailActivity.RESULT_CODE_FROM_EDIT_CONTACT, intent);
         finish();
+    }
+
+    public void setContactStarById(String id, boolean isFavored) {
+        int newStarred = 0;
+        if (isFavored) newStarred = 1;
+        try {
+            ArrayList<ContentProviderOperation> contentProviderOperations = new ArrayList<>();
+            String selection = ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ? ";
+            String[] selectionArgs = new String[]{id};
+            contentProviderOperations.add(ContentProviderOperation.newUpdate(ContactsContract.RawContacts.CONTENT_URI)
+                    .withSelection(selection, selectionArgs)
+                    .withValue(ContactsContract.CommonDataKinds.Phone.STARRED, newStarred).build());
+            ContentProviderResult[] results = this.getContentResolver().applyBatch(ContactsContract.AUTHORITY, contentProviderOperations);
+
+        } catch (Exception e) {
+            Log.w("UpdateContact", e.getMessage() + "");
+        }
     }
 
     private void deleteContactById(final long id) {
