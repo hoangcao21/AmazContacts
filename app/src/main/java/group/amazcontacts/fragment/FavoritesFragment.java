@@ -143,12 +143,7 @@ public class FavoritesFragment extends Fragment {
                 && resultCode == RESULT_CODE_FROM_CONTACT_DETAIL) {
             boolean contactEdited = data.getBooleanExtra("contactEdited", false);
             boolean isMarkFavorite = data.getBooleanExtra("isMarkFavorite", false);
-            if (contactEdited) {
-                ContactsFragment.setContacts(getContext(), getActivity());
-                FavoritesFragment.loadListFavoriteToScreenGlobal("");
-            }
-
-            if (isMarkFavorite) {
+            if (contactEdited || isMarkFavorite) {
                 ContactsFragment.setContacts(getContext(), getActivity());
                 FavoritesFragment.loadListFavoriteToScreenGlobal("");
             }
