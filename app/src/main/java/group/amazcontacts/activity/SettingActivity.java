@@ -35,6 +35,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -116,8 +119,6 @@ public class SettingActivity extends AppCompatActivity {
         window.setStatusBarColor(ContextCompat.getColor(getApplicationContext(), R.color.transparent));
 
 
-
-
         profileAvatar = findViewById(R.id.imgProfileAvatar);
         textViewName = findViewById(R.id.textViewName);
         textViewEmail = findViewById(R.id.textViewEmail);
@@ -186,6 +187,19 @@ public class SettingActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 FirebaseAuth.getInstance().signOut();
+                //gmail signout
+
+                GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                        .requestIdToken(getString(R.string.default_web_client_id))
+                        .requestEmail()
+                        .build();
+                GoogleSignInClient googleSignInClient = GoogleSignIn.getClient(SettingActivity.this, gso);
+                googleSignInClient.signOut().addOnCompleteListener(SettingActivity.this, new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        Toast.makeText(getApplicationContext(), "Sign out from gmail", Toast.LENGTH_LONG).show();
+                    }
+                });
                 Intent i = new Intent(getApplicationContext(), LoginActivity.class);
                 i.putExtra(SignUpActivity.NO_LOGIN_SILENT, false);
 
@@ -649,11 +663,11 @@ public class SettingActivity extends AppCompatActivity {
         super.onBackPressed();
     }
 
-    public void changeToolbarColor(AmazTheme theme){
+    public void changeToolbarColor(AmazTheme theme) {
         changeToolbarColor(theme.getColor());
     }
 
-    public void changeToolbarColor(int color){
+    public void changeToolbarColor(int color) {
         int colorToSet = ContextCompat.getColor(getApplicationContext(), color);
         bar.setBackgroundDrawable(new ColorDrawable(colorToSet));
     }
