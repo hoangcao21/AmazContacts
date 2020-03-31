@@ -109,7 +109,6 @@ public class FavoritesFragment extends Fragment {
     }
 
     private static void startLoading(){
-
         progressBar.setVisibility(View.VISIBLE);
     }
     private static void doneLoading(){
@@ -122,16 +121,6 @@ public class FavoritesFragment extends Fragment {
         emotyTextView.setVisibility(View.INVISIBLE);
     }
     private void loadListFavoriteToScreen(){
-//        ContactDatabaseHandler contactDatabaseHandler = new ContactDatabaseHandler(parentActivty);
-//        List<Contact> favoriteContacts = contactDatabaseHandler.getListFavContact();
-//        ContactAdapter contactAdapter = new ContactAdapter(favoriteContacts, parentActivty);
-//        favListView.setAdapter(contactAdapter);
-//        contactAdapter.notifyDataSetChanged();
-//        if(contactAdapter.getContactList().size() == 0){
-//            setEmptyString();
-//        }else{
-//            setNotEmptyString();
-//        }
         new FavoriteContactUpdateUI(FavoritesFragment.this).execute();
     }
     static class FavoriteContactUpdateUI extends AsyncTask<Void , String , ContactAdapter>{
