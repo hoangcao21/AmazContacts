@@ -1,5 +1,6 @@
 package group.amazcontacts.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.ColorDrawable;
@@ -30,6 +31,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import group.amazcontacts.R;
+import group.amazcontacts.model.AmazTheme;
 import group.amazcontacts.service.GoogleSignInHandlerService;
 
 public class SignUpActivity extends AppCompatActivity {
@@ -91,6 +93,7 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     private void setUp(){
+        initializeTheme();
         firebaseAuth = FirebaseAuth.getInstance();
         progressBar.setVisibility(View.INVISIBLE);
         // set up signin service
@@ -140,5 +143,13 @@ public class SignUpActivity extends AppCompatActivity {
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.setStatusBarColor(ContextCompat.getColor(getApplicationContext(), R.color.transparent));
+    }
+    private void initializeTheme() {
+        SharedPreferences pref = getSharedPreferences("theme", Context.MODE_PRIVATE);
+        int colorFromPref = pref.getInt("themeColor", AmazTheme.BLUE_ACCENT);
+        int colorDrawable = ContextCompat.getColor(getApplicationContext(), colorFromPref);
+        ActionBar mActionBar = getSupportActionBar();
+        mActionBar.setBackgroundDrawable(new ColorDrawable(colorDrawable));
+        mActionBar.setTitle(Html.fromHtml("<font color=\"black\">" + getString(R.string.app_name) + "</font>"));
     }
 }

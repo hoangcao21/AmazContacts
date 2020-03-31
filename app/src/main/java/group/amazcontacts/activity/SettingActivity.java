@@ -186,7 +186,7 @@ public class SettingActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 FirebaseAuth.getInstance().signOut();
-                Intent i = new Intent(getApplicationContext(), SignUpActivity.class);
+                Intent i = new Intent(getApplicationContext(), LoginActivity.class);
                 i.putExtra(SignUpActivity.NO_LOGIN_SILENT, false);
 
                 SharedPreferences sharedPreferences = getSharedPreferences("data", MODE_PRIVATE);
