@@ -466,6 +466,17 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+
+        if (requestCode == REQUEST_CODE_TO_ADD_NEW && resultCode == RESULT_CODE_FROM_ADD_NEW) {
+            if (data != null) {
+                boolean isNewContactAdded = data.getBooleanExtra("isNewContactAdded", false);
+
+                if (isNewContactAdded) {
+                    new ContactsUpdateUI().execute("");
+                }
+            }
+
+        }
     }
 
     class ContactsUpdateUI extends AsyncTask<String, String, String> {

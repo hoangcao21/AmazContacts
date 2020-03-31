@@ -40,6 +40,7 @@ public class AddNewContactActivity extends AppCompatActivity {
     private Button buttonAddPhoneNumber;
     private ListView listViewPhone;
     private ArrayList<PhoneNumber> listPhoneNumber;
+    public static int RESULT_CODE_FROM_ADD_NEW = 301;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,11 +58,19 @@ public class AddNewContactActivity extends AppCompatActivity {
         return true;
     }
 
+    private boolean isNewContactAdded = false;
+
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_save:
                 save();
+                Intent intent = new Intent();
+                if (isNewContactAdded) {
+                    intent.putExtra("isNewContactAdded", true);
+                }
+                setResult(RESULT_CODE_FROM_ADD_NEW, intent);
+                finish();
                 break;
             case android.R.id.home:
                 finish();
@@ -150,17 +159,15 @@ public class AddNewContactActivity extends AppCompatActivity {
         if (!allValueFilled) {
             Toast.makeText(this, "You have to fill in all the fields!", Toast.LENGTH_LONG).show();
             return;
-        }
-        else {
+        } else {
             try {
                 addToContactList(this, name, phoneList, typeList);
+                isNewContactAdded = true;
             } catch (Exception e) {
                 Toast.makeText(this, "Some error occurred!", Toast.LENGTH_SHORT).show();
             }
-            Intent intent = new Intent();
-            setResult(MainActivity.RESULT_CODE_FROM_ADD_NEW, intent);
-            finish();
         }
+
     }
 
     public static long addToContactList(Context context, String strDisplayName, ArrayList<String> phoneList, ArrayList<String> typeList) throws Exception {
@@ -194,7 +201,7 @@ public class AddNewContactActivity extends AppCompatActivity {
         }
 
         final ContentProviderResult[] results = context.getContentResolver().applyBatch(ContactsContract.AUTHORITY, cntProOper); //apply above data insertion into contacts list
-        final String[] projection = new String[] { ContactsContract.RawContacts.CONTACT_ID };
+        final String[] projection = new String[]{ContactsContract.RawContacts.CONTACT_ID};
         final Cursor cursor = contentResolver.query(results[0].uri, projection, null, null, null);
         cursor.moveToNext();
         long contactId = cursor.getLong(0);

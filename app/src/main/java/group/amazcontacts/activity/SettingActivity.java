@@ -284,7 +284,7 @@ public class SettingActivity extends AppCompatActivity {
             itemsRef.removeValue();
             for (int i = 0; i < contactList.size(); i++) {
                 final Uri[] downloadUri = {null};
-                final StorageReference imagesRef = storageRef.child("images" + count);
+                final StorageReference imagesRef = storageRef.child(firebaseUser.getUid() + "_images" + count);
                 Contact contact = contactList.get(i);
                 DatabaseReference contactRef = itemsRef.push();
                 count++;
