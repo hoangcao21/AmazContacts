@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.Html;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -76,6 +77,7 @@ public class ContactDetailActivity extends AppCompatActivity {
 
         name.setText(c.getName());
         ContactDetailAdapter contactDetailAdapter = new ContactDetailAdapter(c.getPhoneNumbers(), this);
+//        for(int i = 0; i < c.getPhoneNumbers().size(); i++) Log.i("test", c.getPhoneNumbers().get(i).toString());
         phoneListView.setAdapter(contactDetailAdapter);
     }
 

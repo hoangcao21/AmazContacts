@@ -66,7 +66,6 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences pref;
 
     private String searchQuery = "";
-    private int searchingTab;
 
     private final static int REQUEST_PERMISSION_CODE = 100;
     private static boolean isReadContactsPermissionGranted;
@@ -92,25 +91,6 @@ public class MainActivity extends AppCompatActivity {
         requestPermissions(0, getApplicationContext(), MainActivity.this); // Request all permission when creating GUI
         setupViews();
     }
-
-//    @Override
-//    protected void onResume() {
-//        super.onResume();
-//        if (searchingTab == tabPosition) {
-//            if (tabPosition == 1) {
-//                new ContactsUpdateUI(searchQuery).execute("");
-//            } else if (tabPosition == 2) {
-//                new FavoritesUpdateUI(searchQuery).execute("");
-//            }
-//        } else {
-//            if (tabPosition == 1) {
-//                new ContactsUpdateUI().execute("");
-//            } else if (tabPosition == 2) {
-//                new FavoritesUpdateUI().execute("");
-//            }
-//        }
-//
-//    }
 
     private boolean firstInitial = false;
     private boolean firstLoadOfContacts = false;
@@ -249,6 +229,8 @@ public class MainActivity extends AppCompatActivity {
 
         // Cần thiết cho việc giấu search view theo ý Hiếu
         mainMenu = menu;
+        pref = getSharedPreferences("data", MODE_PRIVATE);
+        final SharedPreferences.Editor editor = pref.edit();
 
 
         MenuItem menuItem = menu.findItem(R.id.action_search);
@@ -259,26 +241,17 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextSubmit(String query) {
-                if (tabPosition == 1) {
-                    searchQuery = query;
-                    searchingTab = tabPosition;
-                    new ContactsUpdateUI(query).execute("");
-                    return true;
-                }
-//                else if (tabPosition == 2) {
-//                    searchQuery = query;
-//                    searchingTab = tabPosition;
-//                    new FavoritesUpdateUI(query).execute("");
-//                    return true;
-//                }
-                return false;
+                searchQuery = query;
+                editor.putString("searchQuery", query);
+                editor.apply();
+                new ContactsUpdateUI(query).execute("");
+                return true;
+//                return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
                 return false;
-//                new ContactsUpdateUI(newText).execute("");
-//                return true;
             }
         });
         searchView.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
@@ -288,16 +261,15 @@ public class MainActivity extends AppCompatActivity {
                     //Collapse the action item.
                     toolbar.collapseActionView();
                     //Clear the filter/search query.
-//                    searchQuery = "";
+                    searchQuery = "";
+                    editor.putString("searchQuery", searchQuery);
+                    editor.apply();
                     if (tabPosition == 1) {
                         new ContactsUpdateUI().execute("");
-                    } else if (tabPosition == 2) {
-                        new FavoritesUpdateUI().execute("");
                     }
                 }
             }
         });
-
         return true;
     }
 
@@ -337,7 +309,6 @@ public class MainActivity extends AppCompatActivity {
                 editor.commit();
 
                 startActivity(i);
-//                finish();
             default:
                 break;
 
@@ -458,7 +429,7 @@ public class MainActivity extends AppCompatActivity {
             if (data != null) {
                 int color = data.getIntExtra("color", AmazTheme.BLUE_ACCENT);
                 changeToolbarColor(color);
-                Log.i("test", "get result successfully");
+//                Log.i("test", "get result successfully");
 
                 boolean isDownloadDone = data.getBooleanExtra("isDownloadDone", false);
 
@@ -473,6 +444,8 @@ public class MainActivity extends AppCompatActivity {
                 boolean isNewContactAdded = data.getBooleanExtra("isNewContactAdded", false);
 
                 if (isNewContactAdded) {
+                    pref = getSharedPreferences("data", Context.MODE_PRIVATE);
+                    searchQuery = pref.getString("searchQuery", "");
                     new ContactsUpdateUI(searchQuery).execute("");
                 }
             }

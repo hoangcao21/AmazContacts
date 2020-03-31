@@ -196,7 +196,9 @@ public class ContactsFragment extends Fragment {
             boolean contactEdited = data.getBooleanExtra("contactEdited", false);
             boolean isMarkFavorite = data.getBooleanExtra("isMarkFavorite", false);
             if (contactEdited || isMarkFavorite) {
-                new ContactsUpdateUI(getActivity()).execute();
+                SharedPreferences pref = getActivity().getSharedPreferences("data", Context.MODE_PRIVATE);
+                String searchQuery = pref.getString("searchQuery", "");
+                new ContactsUpdateUI(getActivity(), searchQuery).execute();
                 FavoritesFragment.loadListFavoriteToScreenGlobal("");
             }
         }
@@ -364,10 +366,6 @@ public class ContactsFragment extends Fragment {
             }
             cur.close();
         }
-
-    }
-
-    public static void refresh() {
 
     }
 
