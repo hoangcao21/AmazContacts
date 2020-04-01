@@ -30,6 +30,7 @@ public class SplashActivity extends Activity {
                 if (user == null) {
                     Intent signUpIntent = new Intent(SplashActivity.this, LoginActivity.class);
                     startActivity(signUpIntent);
+                    finish();
                 } else {
                     SplashActivity.this.startActivity(mainIntent);
                     overridePendingTransition(R.anim.fadein, R.anim.fadeout);

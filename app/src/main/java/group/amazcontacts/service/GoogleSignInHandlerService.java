@@ -47,7 +47,7 @@ public class GoogleSignInHandlerService {
             Intent i = new Intent(applicationContext , MainActivity.class);
             applicationContext.startActivity(i);
         } catch (ApiException e) {
-            Toast.makeText(applicationContext, "Login Unsuccessful", Toast.LENGTH_SHORT)
+            Toast.makeText(applicationContext, "Login Unsuccessful"+e.getMessage(), Toast.LENGTH_SHORT)
                     .show();
             e.printStackTrace();
             Log.e(TAG, "handleSignInResult: "+e.getStatusCode());
