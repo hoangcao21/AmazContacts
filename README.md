@@ -1,10 +1,24 @@
 # AmazContacts
 An amazing contacts application for Android devices.
-<p align="center">
-  <img src="https://i.imgur.com/x8sAWBq.jpg" width="350" title="hover text">
-  <img src="https://i.imgur.com/x8sAWBq.jpg" width="350" alt="accessibility text">
-</p>
 
+<img src="https://i.imgur.com/WI1cAA1.png" width="350" title="hover text">
+
+  <img src="https://i.imgur.com/x8sAWBq.jpg" width="350" title="hover text">
+  
+  <img src="https://i.imgur.com/xe2p6Qt.jpg" width="350" title="hover text">
+  
+  <img src="https://i.imgur.com/LZDtuS6.jpg" width="350" title="hover text">
+  
+  <img src="https://i.imgur.com/tV6B0KV.jpg" width="350" title="hover text">
+  
+  <img src="https://i.imgur.com/fFHTp5S.jpg" width="350" title="hover text">
+  
+  <img src="https://i.imgur.com/laAJzN8.jpg" width="350" title="hover text">
+  
+  <img src="https://i.imgur.com/Y2iiCU2.jpg" width="350" title="hover text">
+  
+  <img src="https://i.imgur.com/qOqo8vr.jpg" width="350" title="hover text">
+  
 Project document – Group 4 – IS1301
 
 **PRM391 (MOBILE PROGRAMMING)**
@@ -100,8 +114,3 @@ A ![](RackMultipart20200827-4-1wpq8wn_html_b31281c6f6d8ac3b.png)
 
 A ![](RackMultipart20200827-4-1wpq8wn_html_fa6d54f2d311dfed.jpg)
  llows user to change their app theme by selecting one of the theme colors in &quot;Settings&quot; screen. User can go to &quot;Settings&quot; screen from Dial screen, Contacts screen or Favorite screen.
-
-# **Task assignment**
-
-Right after we agreed with the idea of making a contact book, we immediately planned and allocated suitable tasks for each member. Details of task assignment process are shown below:
-
