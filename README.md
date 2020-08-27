@@ -1,12 +1,8 @@
 # AmazContacts
 An amazing contacts application for Android devices.
-![alt text](blob:https://imgur.com/6175712f-489d-4f58-8153-0fbe3b9498d5)
+![alt text]('https://imgur.com/6175712f-489d-4f58-8153-0fbe3b9498d5')
 
 Project document – Group 4 – IS1301
-
-![](RackMultipart20200827-4-1wpq8wn_html_713eadb94f7469ae.gif)
-
-![](RackMultipart20200827-4-1wpq8wn_html_997d3dd47ee3c16c.png)
 
 **PRM391 (MOBILE PROGRAMMING)**
 
