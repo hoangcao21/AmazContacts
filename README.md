@@ -1,6 +1,9 @@
 # AmazContacts
 An amazing contacts application for Android devices.
-![alt text]('https://imgur.com/6175712f-489d-4f58-8153-0fbe3b9498d5')
+<p align="center">
+  <img src="https://i.imgur.com/x8sAWBq.jpg" width="350" title="hover text">
+  <img src="https://i.imgur.com/x8sAWBq.jpg" width="350" alt="accessibility text">
+</p>
 
 Project document – Group 4 – IS1301
 
